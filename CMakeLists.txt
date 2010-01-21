@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 2.6) 
 project(OpenCVjp_Samples)
 
-cmake_policy(SET CMP0002 OLD)
-
 set(REQ_OPENCV_VER 2.0.0)
 
 include(${CMAKE_ROOT}/Modules/FindPkgConfig.cmake OPTIONAL)
@@ -11,9 +9,23 @@ if(PKG_CONFIG_FOUND)
   if(NOT OPENCV_FOUND OR OPENCV_VERSION VERSION_LESS REQ_OPENCV_VER)
     message(FATAL_ERROR "Could not find OpenCV>=" ${REQ_OPENCV_VER})
   endif()
+elseif(WIN32 AND MSVC)
+  find_package(OPENCV REQUIRED)
+  message(${OPENCV_FOUND})
+  set(OPENCV_LIBRARIES cxcore200 cv200 highgui200 cvaux200)
+  set(OPENCV_LIBS_DIRS ${OPENCV_DIR}/Build/lib/Release CACHE STRING "" FORCE)
+  link_directories(${OPENCV_LIBS_DIRS})
+
+  string(REPLACE "/W3" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+  string(REPLACE "/W3" "/W4" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
+  string(REPLACE "/W3" "/W4" CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
+  string(REPLACE "/EHsc" "/EHsc-" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+  string(REPLACE "/EHsc" "/EHsc-" CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}")
+  string(REPLACE "/EHsc" "/EHsc-" CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG}")
+  string(REPLACE "/EHsc" "/EHsc-" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+  string(REPLACE "/EHsc" "/EHsc-" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
+  string(REPLACE "/EHsc" "/EHsc-" CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
 endif()
 add_subdirectory(c)
 add_subdirectory(cpp)
-
-
 

@@ -6,7 +6,6 @@ foreach(P ${SOURCES})
   string(REPLACE ".cpp" "" EXEFILE ${SOURCE})
   if(NOT ${SOURCE} MATCHES "^[.](/[.])*[^/]+$")
     add_executable(${EXEFILE} ${SOURCE})
-    target_link_libraries(${EXEFILE} ${OPENCV_LIBRARIES})
+    target_link_libraries(${EXEFILE} ${OPENCV_LIBRARIES} ${OPENCV_LIBRARIES_DEBUG})
   endif()
 endforeach()
-

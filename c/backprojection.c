@@ -5,7 +5,7 @@ int
 main (int argc, char **argv)
 {
   int i, hist_size = 90;
-  float h_ranges[] = { 0, 181 };
+  float h_ranges[] = { 0, 180 };
   float *ranges[] = { h_ranges };
   double min_val, max_val;
   CvSize dst_size;
@@ -37,7 +37,7 @@ main (int argc, char **argv)
   cvCvtPixToPlane (src_hsv, src_planes[0], src_planes[1], src_planes[2], 0);
   cvCvtPixToPlane (tmp_hsv, tmp_planes[0], tmp_planes[1], tmp_planes[2], 0);
 
-  // (4)テンプレート画像のヒストグラムを計算します． 
+  // (4)テンプレート画像の色相平面のヒストグラムを計算します． 
   hist = cvCreateHist (1, &hist_size, CV_HIST_ARRAY, ranges, 1);
   cvCalcHist (&tmp_planes[0], hist, 0, 0);
   // (5)探索画像全体に対して，テンプレートのヒストグラムとの距離（手法に依存）を計算します． 
@@ -45,7 +45,7 @@ main (int argc, char **argv)
     cvSize (src_img->width - tmp_img->width + 1,
 	    src_img->height - tmp_img->height + 1);
   dst_img = cvCreateImage (dst_size, IPL_DEPTH_32F, 1);
-  cvCalcBackProjectPatch (src_planes, dst_img, cvGetSize (tmp_img), hist,
+  cvCalcBackProjectPatch (&src_planes[0], dst_img, cvGetSize (tmp_img), hist,
 			  CV_COMP_CORREL, 1.0);
   cvMinMaxLoc (dst_img, &min_val, &max_val, &min_loc, &max_loc, NULL);
   // (6)テンプレートに対応する位置に矩形を描画します． 
@@ -53,8 +53,10 @@ main (int argc, char **argv)
 	       cvPoint (max_loc.x + tmp_img->width,
 			max_loc.y + tmp_img->height), CV_RGB (255, 0, 0), 3, 8, 0);
   
-  cvNamedWindow ("Image", 1);
-  cvShowImage ("Image", src_img);
+  cvNamedWindow ("src", CV_WINDOW_AUTOSIZE);
+  cvNamedWindow ("dst", CV_WINDOW_AUTOSIZE);
+  cvShowImage ("src", src_img);
+  cvShowImage ("dst", dst_img);
   cvWaitKey (0);
   
   cvDestroyWindow("Image");

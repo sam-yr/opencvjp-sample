@@ -10,9 +10,9 @@ main (int argc, char **argv)
   IplImage *combined_img;
   CvRect roi = cvRect(0, 0, 0, 0);
 
-  // (1)コマンド引数で指定された画像を全て読み込む
+  // (1)コマンド引数で指定された画像を全て読み込みます． 
   if(argc < 2) {
-    return 1;
+    return 0;
   } else {
     img_num = argc - 1;
     src_img = (IplImage**)cvAlloc(sizeof(IplImage*)*img_num);
@@ -25,7 +25,7 @@ main (int argc, char **argv)
     }
   }
 
-  // (2)画像を横方向に連結する
+  // (2)画像を横方向に連結します． 
   combined_img = cvCreateImage(cvSize(total_width, max_height), IPL_DEPTH_8U, 3);
   cvZero(combined_img);
   for(i=0; i<img_num; i++) {
@@ -37,7 +37,7 @@ main (int argc, char **argv)
   }
   cvResetImageROI(combined_img);
 
-  // 
+  // (3)画像を表示し，キーが押されたときに終了します． 
   cvNamedWindow ("Image", CV_WINDOW_AUTOSIZE);
   cvShowImage ("Image", combined_img);
   cvWaitKey (0);

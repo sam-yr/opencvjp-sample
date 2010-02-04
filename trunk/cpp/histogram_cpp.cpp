@@ -8,42 +8,58 @@ int
 main (int argc, char **argv)
 {
 
+  // (1)画像を読み込みます． 
   const char *imagename = argc > 1 ? argv[1] : "flower.png";
   Mat src_img = imread(imagename, -1);
   if(!src_img.data)
     return -1;
 
-  const int channels[] = {0,1,2};
-  MatND hist;
-  const int hdims[] = {256, 256, 256};
-  int hist_size = 256;
-  float hranges[] = {0,256};
-  const float* ranges[] = {hranges, hranges, hranges};
+  // (2)ヒストグラム画像領域を確保します． 
+  const int ch_width = 260;
+  const int sch = src_img.channels();
+  Mat hist_img(Size(ch_width * sch, 200), CV_8UC3, Scalar::all(255));
 
-  calcHist(&src_img, 1, channels, Mat(), hist, 1, hdims, ranges, true, false);
-  double min_val = .0, max_val = .0;
-  minMaxLoc(hist, &min_val, &max_val);
-  hist.convertTo(hist, hist.type(), max_val?200./max_val:0.,0);
+  vector<MatND> hist(3);
+  const int hist_size = 256;
+  const int hdims[] = {hist_size};
+  const float hranges[] = {0,256};
+  const float* ranges[] = {hranges};
+  double max_val = .0;
 
-  int sch = 3, ch_width = 260;
-  Mat histimg(Size(ch_width * sch, 200), CV_8UC3, Scalar::all(255));
-
-  int i=0;
-  for(int i=0; i<3; i++) {
-  for(int j=0; j<hist_size; ++j) {
-    int bin_w = saturate_cast<int>((double)ch_width/hist_size);
-    std::cout << "j=" << j << std::endl;
-    std::cout << "ch=" << hist.channels() << " dims=" << hist.dims << std::endl;
-    //std::cout << j*bin_w+(i*ch_width) << ","<< histimg.rows << "(fixed)" <<std::endl;
-    //std::cout << (j+1)*bin_w+(i*ch_width)<<","<< histimg.rows-saturate_cast<int>(hist.at<Vec3f>(j)[0])<<std::endl;
-    rectangle(histimg, 
-	      Point(j*bin_w+(i*ch_width), histimg.rows),
-	      Point((j+1)*bin_w+(i*ch_width), histimg.rows-saturate_cast<int>(hist.at<Vec3f>(j)[i])),
-	      Scalar(255,0,0), -1);
+  if(sch==1) {
+    // (3a)入力画像がシングルチャンネルの場合，そのチャンネルのヒストグラムを計算します． 
+    calcHist(&src_img, 1, 0, Mat(), hist[0], 1, hdims, ranges, true, false);
+    minMaxLoc(hist[0], 0, &max_val);
+  } else {
+    // (3b)入力画像がマルチチャンネルの場合，画像をチャンネル毎に分割してヒストグラムを計算します． 
+    for(int i=0; i<sch; ++i) {
+      calcHist(&src_img, 1, &i, Mat(), hist[i], 1, hdims, ranges, true, false);
+      double tmp_val;
+      minMaxLoc(hist[i], 0, &tmp_val);
+      max_val = max_val < tmp_val ? tmp_val : max_val;
+    }
   }
-}
-  namedWindow("src", CV_WINDOW_AUTOSIZE);
-  imshow("src", histimg);
+
+  // (4)ヒストグラムをスケーリングして，描画します． 
+  Scalar color = Scalar::all(100);
+  for(int i=0; i<sch; i++) {
+    if(sch==3)
+      color = Scalar((0xaa<<i*8)&0x0000ff,(0xaa<<i*8)&0x00ff00,(0xaa<<i*8)&0xff0000, 0);
+    hist[i].convertTo(hist[i], hist[i].type(), max_val?200./max_val:0.,0);
+    for(int j=0; j<hist_size; ++j) {
+      int bin_w = saturate_cast<int>((double)ch_width/hist_size);
+      rectangle(hist_img, 
+		Point(j*bin_w+(i*ch_width), hist_img.rows),
+		Point((j+1)*bin_w+(i*ch_width), hist_img.rows-saturate_cast<int>(hist[i].at<float>(j))),
+		color, -1);
+    }
+  }
+
+  // (5)ヒストグラム画像を表示，キーが押されたときに終了します． 
+  namedWindow("Image", CV_WINDOW_AUTOSIZE);
+  namedWindow("Histogram", CV_WINDOW_AUTOSIZE);
+  imshow("Image", src_img);
+  imshow("Histogram", hist_img);
   waitKey(0);
   
   return 0;

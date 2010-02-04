@@ -19,7 +19,7 @@ main (int argc, char **argv)
   std::cout << points1.elemSize() << std::endl;
 
   // (3)点列を．描画します
-#if 1
+#if 0
   vector<Mat> planes;
   split(points1, planes);
   MatIterator_<int> it0 = planes[0].begin<int>(), it0_end = planes[0].end<int>();
@@ -27,9 +27,15 @@ main (int argc, char **argv)
   for(; it0 != it0_end; ++it0, ++it1) {
     circle(img, Point(*it0, *it1), 3, Scalar(0,255,0), -1);
   }
+#elif 0
+  MatIterator_<Vec2i> it = points1.begin<Vec2i>(), it_end = points1.end<Vec2i>();
+  for(; it!=it_end; ++it) {
+    circle(img, Point((*it)[0], (*it)[1]), 3, Scalar(0,255,0), -1);
+  }
 #else
   int *p = points1.ptr<int>();
-  for(int i=0; i<points1.cols; i++, p+=points1.elemSize()/sizeof(int)) {
+  int inc = points1.elemSize()/sizeof(int);
+  for(int i=0; i<points1.cols; i++, p+=inc) {
     circle(img, Point(p[0], p[1]), 3, Scalar(0,255,0), -1);
   }
 #endif

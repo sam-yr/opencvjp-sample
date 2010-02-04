@@ -10,7 +10,7 @@ main (int argc, char **argv)
 {
 
   // (1)画像を確保し初期化します． 
-  Mat img(Size(640, 480), CV_8UC3);
+  Mat img = Mat::zeros(Size(640, 480), CV_8UC3);
 
   // (2)点列を生成します． 
   Mat points1(Size(50, 1), CV_32SC2);

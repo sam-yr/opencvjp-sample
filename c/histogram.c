@@ -54,10 +54,8 @@ main (int argc, char **argv)
     bin_w = cvRound ((double) ch_width / hist_size);
     for (j = 0; j < hist_size; j++)
       cvRectangle (hist_img,
-		   cvPoint (j * bin_w + (i * ch_width), hist_img->height),
-		   cvPoint ((j + 1) * bin_w + (i * ch_width),
-			    hist_img->height -
-			    cvRound (cvGetReal1D (hist[i]->bins, j))),
+		   cvPoint(j*bin_w+(i*ch_width), hist_img->height),
+		   cvPoint((j+1)*bin_w+(i*ch_width), hist_img->height-cvRound(cvGetReal1D(hist[i]->bins, j))),
 		   color, -1, 8, 0);
   }
 

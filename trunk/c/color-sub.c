@@ -12,7 +12,7 @@ int main( int argc, char** argv )
   CvMat* color = cvCreateMat( MAX_CLUSTERS, 1, CV_32FC3);
   CvMat* count = cvCreateMat( MAX_CLUSTERS, 1, CV_32SC1);
 
-  // (1)画像を読み込む
+  // (1)画像を読み込みます． 
   if(argc != 2 || (src_img = cvLoadImage (argv[1], CV_LOAD_IMAGE_COLOR))==0)
     return -1;
   

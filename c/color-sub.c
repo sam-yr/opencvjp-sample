@@ -21,14 +21,14 @@ int main( int argc, char** argv )
   clusters = cvCreateMat(size, 1, CV_32SC1 );
   points   = cvCreateMat( size, 1, CV_32FC3 );
 
-  // (2)ピクセルの値を行列へ代入
+  // (2)ピクセルの値を行列へ代入します． 
   for(i=0; i<size; i++) {
     points->data.fl[i*3+0] = (uchar)src_img->imageData[i*3+0];
     points->data.fl[i*3+1] = (uchar)src_img->imageData[i*3+1];
     points->data.fl[i*3+2] = (uchar)src_img->imageData[i*3+2];
   }
 
-  // (3)クラスタリング
+  // (3)k-means クラスタリングを行います． 
   cvKMeans2( points, MAX_CLUSTERS, clusters,
 	     cvTermCriteria( CV_TERMCRIT_EPS+CV_TERMCRIT_ITER, 10, 1.0 ),
 	     1, 0, 0, 0, 0 );
@@ -44,7 +44,7 @@ int main( int argc, char** argv )
     color->data.fl[idx*3+2] = color->data.fl[idx*3+2]*(j-1)/j + points->data.fl[i*3+2]/j;
   }  
   
-  // (5)クラスタ毎に色を描画
+  // (5)クラスタ毎に色を描画します． 
   for(i=0; i<size; i++) {
     int idx = clusters->data.i[i];
     dst_img->imageData[i*3+0] = (char)color->data.fl[idx*3+0];
@@ -52,7 +52,7 @@ int main( int argc, char** argv )
     dst_img->imageData[i*3+2] = (char)color->data.fl[idx*3+2];
   }
 
-  // (6)画像を表示，キーが押されたときに終了
+  // (6)画像を表示，キーが押されたときに終了します． 
   cvNamedWindow( "src", CV_WINDOW_AUTOSIZE);
   cvShowImage( "src", src_img );
   cvNamedWindow( "low-color", CV_WINDOW_AUTOSIZE);

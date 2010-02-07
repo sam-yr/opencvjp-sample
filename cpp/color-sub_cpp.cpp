@@ -1,6 +1,5 @@
 #include <cv.h>
 #include <highgui.h>
-#include <iostream>
 
 using namespace cv;
 
@@ -14,29 +13,26 @@ main (int argc, char **argv)
     return -1;
 
   // (2)画像（行列）の形状を変形して， 1 行の行列にします． 
-  const int cluster_count = 3;
   Mat points;
-  const int cluster_count = 10;
-
-  // (2)画像の形状を変形します． 
+  const int cluster_count = 10; /* クラスタ数 */
   src_img.convertTo(points, CV_32FC3);
   points = points.reshape(3, src_img.rows*src_img.cols);
 
-    // (3)k-meansクラスタリングを実行します．
+  // (3)k-meansクラスタリングを実行します．
   Mat_<int> clusters(points.size(), CV_32SC1);
   Mat centers;
   kmeans(points, cluster_count, clusters, 
 	 cvTermCriteria(CV_TERMCRIT_EPS+CV_TERMCRIT_ITER, 10, 1.0), 1, KMEANS_PP_CENTERS, &centers);
-
 
   // (4)画素値を，それが属するクラスタの中心値で代表します． 
   Mat dst_img(src_img.size(), src_img.type());
   MatIterator_<Vec3f> itf = centers.begin<Vec3f>();
   MatIterator_<Vec3b> itd = dst_img.begin<Vec3b>(), itd_end = dst_img.end<Vec3b>();
   for(int i=0; itd != itd_end; ++itd, ++i) {
-    (*itd)[0] = saturate_cast<uchar>(itf[clusters(1,i)][0]);
-    (*itd)[1] = saturate_cast<uchar>(itf[clusters(1,i)][1]);
-    (*itd)[2] = saturate_cast<uchar>(itf[clusters(1,i)][2]);
+    Vec3f color = itf[clusters(1,i)];
+    (*itd)[0] = saturate_cast<uchar>(color[0]);
+    (*itd)[1] = saturate_cast<uchar>(color[1]);
+    (*itd)[2] = saturate_cast<uchar>(color[2]);
   }
 
   // (5)画像を表示，キーが押されたときに終了します．   

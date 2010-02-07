@@ -1,6 +1,5 @@
 #include <cv.h>
 #include <highgui.h>
-#include <stdio.h>
 
 #define MAX_CLUSTERS (10) /* クラスタ数 */
 
@@ -22,17 +21,18 @@ int main( int argc, char** argv )
   clusters = cvCreateMat(size, 1, CV_32SC1 );
   points   = cvCreateMat( size, 1, CV_32FC3 );
 
+  // ToDo....
   // (2)ピクセルの値を行列へ代入します． 
   for(i=0; i<size; i++) {
     points->data.fl[i*3+0] = (uchar)src_img->imageData[i*3+0];
     points->data.fl[i*3+1] = (uchar)src_img->imageData[i*3+1];
     points->data.fl[i*3+2] = (uchar)src_img->imageData[i*3+2];
   }
-
+  
   // (3)k-meansクラスタリングを実行します．
   cvKMeans2( points, MAX_CLUSTERS, clusters,
 	     cvTermCriteria( CV_TERMCRIT_EPS+CV_TERMCRIT_ITER, 10, 1.0 ),
-	     1, 0, KMEANS_PP_CENTERS, centers, 0);
+	     1, 0, 0, centers, 0);
 
   // (4)画素値を，それが属するクラスタの中心値で代表します． 
   for(i=0; i<size; i++) {

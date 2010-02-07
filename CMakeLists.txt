@@ -58,7 +58,7 @@ if(MSVC)
 endif()
 
 if(CMAKE_COMPILER_IS_GNUCXX)
-    set(EXTRA_C_FLAGS "${EXTRA_C_FLAGS} -Wall")
+    #set(EXTRA_C_FLAGS "${EXTRA_C_FLAGS} -Wall")
     # Parallel mode
     if(ENABLE_OPENMP)
         set(EXTRA_C_FLAGS "${EXTRA_C_FLAGS} -D_GLIBCXX_PARALLEL -fopenmp")

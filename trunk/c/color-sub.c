@@ -1,7 +1,8 @@
 #include <cv.h>
 #include <highgui.h>
+#include <stdio.h>
 
-#define MAX_CLUSTERS (32) /* クラスタ数 */
+#define MAX_CLUSTERS (10) /* クラスタ数 */
 
 int main( int argc, char** argv )
 {
@@ -9,8 +10,8 @@ int main( int argc, char** argv )
   IplImage *src_img = 0, *dst_img = 0;
   CvMat* clusters;
   CvMat* points;
-  CvMat* color = cvCreateMat( MAX_CLUSTERS, 1, CV_32FC3);
   CvMat* count = cvCreateMat( MAX_CLUSTERS, 1, CV_32SC1);
+  CvMat* centers = cvCreateMat( MAX_CLUSTERS, 3, CV_32FC1);
 
   // (1)画像を読み込みます． 
   if(argc != 2 || (src_img = cvLoadImage (argv[1], CV_LOAD_IMAGE_COLOR))==0)
@@ -28,31 +29,20 @@ int main( int argc, char** argv )
     points->data.fl[i*3+2] = (uchar)src_img->imageData[i*3+2];
   }
 
-  // (3)k-means クラスタリングを行います． 
+  // (3)k-meansクラスタリングを実行します．
   cvKMeans2( points, MAX_CLUSTERS, clusters,
 	     cvTermCriteria( CV_TERMCRIT_EPS+CV_TERMCRIT_ITER, 10, 1.0 ),
-	     1, 0, 0, 0, 0 );
+	     1, 0, KMEANS_PP_CENTERS, centers, 0);
 
-  // (4)各クラスタの平均値を計算
-  cvSetZero(color);
-  cvSetZero(count);
+  // (4)画素値を，それが属するクラスタの中心値で代表します． 
   for(i=0; i<size; i++) {
     int idx = clusters->data.i[i];
-    int j = ++count->data.i[idx];;
-    color->data.fl[idx*3+0] = color->data.fl[idx*3+0]*(j-1)/j + points->data.fl[i*3+0]/j;
-    color->data.fl[idx*3+1] = color->data.fl[idx*3+1]*(j-1)/j + points->data.fl[i*3+1]/j;
-    color->data.fl[idx*3+2] = color->data.fl[idx*3+2]*(j-1)/j + points->data.fl[i*3+2]/j;
-  }  
-  
-  // (5)クラスタ毎に色を描画します． 
-  for(i=0; i<size; i++) {
-    int idx = clusters->data.i[i];
-    dst_img->imageData[i*3+0] = (char)color->data.fl[idx*3+0];
-    dst_img->imageData[i*3+1] = (char)color->data.fl[idx*3+1];
-    dst_img->imageData[i*3+2] = (char)color->data.fl[idx*3+2];
+    dst_img->imageData[i*3+0] = (char)centers->data.fl[idx*3+0];
+    dst_img->imageData[i*3+1] = (char)centers->data.fl[idx*3+1];
+    dst_img->imageData[i*3+2] = (char)centers->data.fl[idx*3+2];
   }
 
-  // (6)画像を表示，キーが押されたときに終了します． 
+  // (5)画像を表示，キーが押されたときに終了します． 
   cvNamedWindow( "src", CV_WINDOW_AUTOSIZE);
   cvShowImage( "src", src_img );
   cvNamedWindow( "low-color", CV_WINDOW_AUTOSIZE);
@@ -65,7 +55,7 @@ int main( int argc, char** argv )
   cvReleaseImage(&dst_img);
   cvReleaseMat(&clusters);
   cvReleaseMat(&points);
-  cvReleaseMat(&color);
+  cvReleaseMat(&centers);
   cvReleaseMat(&count);
   
   return 0;

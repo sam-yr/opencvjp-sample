@@ -21,13 +21,20 @@ int main( int argc, char** argv )
   clusters = cvCreateMat(size, 1, CV_32SC1 );
   points   = cvCreateMat( size, 1, CV_32FC3 );
 
-  // ToDo....
   // (2)ピクセルの値を行列へ代入します． 
+#if 1
+  CvMat tmp_header;
+  CvMat *tmp = cvCreateMat(size, 1, CV_8UC3);
+  tmp = cvReshape(src_img, &tmp_header, 0, size);
+  cvConvert(tmp, points);
+  cvReleaseMat(&tmp);
+#else
   for(i=0; i<size; i++) {
     points->data.fl[i*3+0] = (uchar)src_img->imageData[i*3+0];
     points->data.fl[i*3+1] = (uchar)src_img->imageData[i*3+1];
     points->data.fl[i*3+2] = (uchar)src_img->imageData[i*3+2];
   }
+#endif
   
   // (3)k-meansクラスタリングを実行します．
   cvKMeans2( points, MAX_CLUSTERS, clusters,

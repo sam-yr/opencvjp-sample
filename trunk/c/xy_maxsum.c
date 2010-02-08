@@ -1,12 +1,12 @@
 #include <cv.h>
 #include <highgui.h>
-#include <stdio.h>
 
 IplImage *src_img = 0, *disp_img, *bin_img;
 CvMat *xsum, *ysum;
 
 void on_trackbar1(int val);
 
+/** メイン関数 **/
 int
 main(int argc, char *argv[])
 {
@@ -25,15 +25,14 @@ main(int argc, char *argv[])
   xsum = cvCreateMat(1, bin_img->width, CV_32FC1);
   ysum = cvCreateMat(bin_img->height, 1, CV_32FC1);
 
-  cvSmooth(bin_img, bin_img, CV_GAUSSIAN, 5, 0, 0, 0);
-  cvThreshold(bin_img, bin_img, 125, 255, CV_THRESH_BINARY_INV);
+  cvSmooth(bin_img, bin_img, CV_GAUSSIAN, 3, 0, 0, 0);
+  cvThreshold(bin_img, bin_img, level, 255, CV_THRESH_BINARY_INV);
 
   cvReduce(bin_img, xsum, -1, CV_REDUCE_SUM);
   cvReduce(bin_img, ysum, -1, CV_REDUCE_SUM);
 
   cvMinMaxLoc(xsum, NULL, NULL, NULL, &xloc, NULL);
   cvMinMaxLoc(ysum, NULL, NULL, NULL, &yloc, NULL);
-  printf("(%d, %d)\n", xloc.x, yloc.y);
 
   cvCircle(disp_img, cvPoint(xloc.x, yloc.y), 10, CV_RGB(255, 0, 0), 2, 8, 0);
 
@@ -51,12 +50,14 @@ main(int argc, char *argv[])
   return 0;
 }
 
+/** トラックバーイベントのコールバック関数 **/
 void
 on_trackbar1(int val)
 {
   CvPoint xloc, yloc;
 
   cvCvtColor(src_img, bin_img, CV_RGB2GRAY);
+  cvSmooth(bin_img, bin_img, CV_GAUSSIAN, 3, 0, 0, 0);
   cvThreshold(bin_img, bin_img, val, 255, CV_THRESH_BINARY_INV);
 
   cvReduce(bin_img, xsum, -1, CV_REDUCE_SUM);
@@ -64,7 +65,6 @@ on_trackbar1(int val)
 
   cvMinMaxLoc(xsum, NULL, NULL, NULL, &xloc, NULL);
   cvMinMaxLoc(ysum, NULL, NULL, NULL, &yloc, NULL);
-  printf("(%d, %d)\n", xloc.x, yloc.y);
 
   cvCopy(src_img, disp_img, NULL);
   cvCircle(disp_img, cvPoint(xloc.x, yloc.y), 10, CV_RGB(255, 0, 0), 2, 8, 0);

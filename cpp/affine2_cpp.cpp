@@ -6,7 +6,8 @@ using namespace cv;
 int
 main(int argc, char **argv)
 {
-  // (1)画像の読み込み（カラー），ROIの設定，出力画像の確保を行います． 
+  // (1)load a specified file as a 3-channel color image,
+  //    set its ROI, and allocate a destination image
   const char *imagename = argc > 1 ? argv[1] : "vegas.png";
   Mat src_img = imread(imagename);
   if(!src_img.data)
@@ -17,16 +18,16 @@ main(int argc, char **argv)
   Mat src_roi(src_img, roi_rect);
   Mat dst_roi(dst_img, roi_rect);
   
-  // (2)角度，回転中心，スケール係数を指定して
-  //    cv2DRotationMatrixを用いてアフィン変換行列を求めます． 
+  // (2)With specified three parameters (angle, rotation center, scale)
+  //    calculate an affine transformation matrix by cv2DRotationMatrix
   double angle = -45.0, scale = 1.0;
   Point2d center(src_roi.cols*0.5, src_roi.rows*0.5);
   const Mat affine_matrix = getRotationMatrix2D( center, angle, scale );
 
-  // (3)求めたアフィン変換行列を引数に与え，cvWarpAffineを用いて画像を回転させます． 
+  // (3)rotate the image by warpAffine taking the affine matrix
   warpAffine(src_roi, dst_roi, affine_matrix, dst_roi.size(), INTER_LINEAR, BORDER_CONSTANT, Scalar::all(255));
 
-  // (4)元画像にROIを表す矩形を書き込み，結果を表示します． 
+  // (4)show source and destination images with a rectangle indicating ROI
   rectangle(src_img, roi_rect.tl(), roi_rect.br(), Scalar(255,0,255), 2);
 
   namedWindow("src", CV_WINDOW_AUTOSIZE);

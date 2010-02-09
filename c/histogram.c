@@ -10,41 +10,42 @@ main (int argc, char **argv)
   float max_val = 0;
   float range_0[] = { 0, 256 };
   float *ranges[] = { range_0 };
-  IplImage *src_img = 0, *dst_img[4] = { 0, 0, 0, 0 }, *hist_img;
+  IplImage *src_img = 0, *planes[4] = { 0, 0, 0, 0 }, *hist_img;
   CvHistogram *hist[3];
   char *imagename;
 
-  // (1)画像を読み込み，入力画像のチャンネル数分の画像領域を確保します． 
+  // (1)load a source image as is 
+  //    and allocate the same number of images and histogram structures as the channels
   imagename = argc > 1 ? argv[1] : "flower.png";
   src_img = cvLoadImage(imagename, CV_LOAD_IMAGE_ANYCOLOR);
   if(src_img == 0)
     return -1;
   sch = src_img->nChannels;
   for (i = 0; i < sch; i++) {
-    dst_img[i] = cvCreateImage(cvSize(src_img->width, src_img->height), src_img->depth, 1);
+    planes[i] = cvCreateImage(cvSize(src_img->width, src_img->height), src_img->depth, 1);
     hist[i] = cvCreateHist(1, &hist_size, CV_HIST_ARRAY, ranges, 1);
   }
 
-  // (2)ヒストグラム構造体，ヒストグラム画像領域を確保します． 
+  // (2) allocate a histogram image
   hist_img = cvCreateImage(cvSize(ch_width * sch, 200), 8, 3);
 
   if (sch == 1) {
-    // (3a)入力画像がシングルチャンネルの場合，そのチャンネルのヒストグラムを計算します． 
-    cvCopy(src_img, dst_img[0], NULL);
-    cvCalcHist (&dst_img[0], hist[0], 0, NULL);
+    // (3a)if the source image has single-channel, calculate its histogram
+    cvCopy(src_img, planes[0], NULL);
+    cvCalcHist (&planes[0], hist[0], 0, NULL);
     cvGetMinMaxHistValue (hist[0], 0, &max_val, 0, 0);
   } else {
-    // (3b)入力画像がマルチチャンネルの場合，画像をチャンネル毎に分割してヒストグラムを計算します． 
-    cvSplit(src_img, dst_img[0], dst_img[1], dst_img[2], dst_img[3]);
+    // (3b)if the souce image has multi-channel, aplit it and calculate histogram of each plane
+    cvSplit(src_img, planes[0], planes[1], planes[2], planes[3]);
     for (i = 0; i < sch; i++) {
       float tmp_val;
-      cvCalcHist (&dst_img[i], hist[i], 0, NULL);
+      cvCalcHist (&planes[i], hist[i], 0, NULL);
       cvGetMinMaxHistValue (hist[i], 0, &tmp_val, 0, 0);
       max_val = max_val < tmp_val ? tmp_val : max_val;
     }
   }
 
-  // (4)ヒストグラムをスケーリングして，描画します． 
+   // (4)scale and draw the histogram(s)
   cvSet(hist_img, cvScalarAll (255), 0);
   CvScalar color = cvScalarAll(100);
   for (i = 0; i < sch; i++) {
@@ -59,7 +60,7 @@ main (int argc, char **argv)
 		   color, -1, 8, 0);
   }
 
-  // (5)ヒストグラム画像を表示，キーが押されたときに終了します． 
+  // (5)show the histogram iamge, and quit when any key pressed
   cvNamedWindow ("Image", CV_WINDOW_AUTOSIZE);
   cvShowImage ("Image", src_img);
   cvNamedWindow ("Histogram", CV_WINDOW_AUTOSIZE);
@@ -70,7 +71,7 @@ main (int argc, char **argv)
   cvReleaseImage(&src_img);
   cvReleaseImage(&hist_img);
   for(i=0; i<sch; i++) {
-    cvReleaseImage(&dst_img[i]);
+    cvReleaseImage(&planes[i]);
     cvReleaseHist(&hist[i]);
   }
 

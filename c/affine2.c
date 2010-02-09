@@ -12,7 +12,8 @@ main(int argc, char **argv)
   CvRect rect;
   char *imagename;
 
-  // (1)画像の読み込み（カラー），ROIの設定，出力画像の確保を行います． 
+  // (1)load a specified file as a 3-channel color image,
+  //    set its ROI, and allocate a destination image
   imagename = argc > 1 ? argv[1] : "vegas.png";
   src_img = cvLoadImage(imagename, CV_LOAD_IMAGE_COLOR);
   if(src_img == 0)
@@ -24,16 +25,16 @@ main(int argc, char **argv)
   cvSetImageROI(src_img, rect);
   dst_img = cvCloneImage(src_img);
 
-  // (2)角度，回転中心，スケール係数を指定して
-  //    cv2DRotationMatrixを用いてアフィン変換行列を求めます． 
+  // (2)With specified three parameters (angle, rotation center, scale)
+  //    calculate an affine transformation matrix by cv2DRotationMatrix
   affine_matrix = cvCreateMat(2, 3, CV_32FC1);
   center = cvPoint2D32f(src_img->width * 0.25, src_img->height * 0.25);
   cv2DRotationMatrix(center, angle, scale, affine_matrix);
 
-  // (3)求めたアフィン変換行列を引数に与え，cvWarpAffineを用いて画像を回転させます． 
+  // (3)rotate the image by warpAffine taking the affine matrix
   cvWarpAffine(src_img, dst_img, affine_matrix, CV_INTER_LINEAR + CV_WARP_FILL_OUTLIERS, cvScalarAll(255));
 
-  // (4)ROIをリセットし，元画像にROIを表す矩形を書き込み，最後に結果を表示します． 
+  // (4)reset ROI, then show source and destination image with a rectangle indicating ROI
   cvResetImageROI(src_img);
   cvResetImageROI(dst_img);
 

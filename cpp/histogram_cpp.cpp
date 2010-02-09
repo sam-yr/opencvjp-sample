@@ -8,13 +8,13 @@ int
 main (int argc, char **argv)
 {
 
-  // (1)画像を読み込みます． 
+  // (1)load a source image as is
   const char *imagename = argc > 1 ? argv[1] : "flower.png";
   Mat src_img = imread(imagename, -1);
   if(!src_img.data)
     return -1;
 
-  // (2)ヒストグラム画像領域を確保します． 
+  // (2)allocate a histogram image
   const int ch_width = 260;
   const int sch = src_img.channels();
   Mat hist_img(Size(ch_width * sch, 200), CV_8UC3, Scalar::all(255));
@@ -27,11 +27,11 @@ main (int argc, char **argv)
   double max_val = .0;
 
   if(sch==1) {
-    // (3a)入力画像がシングルチャンネルの場合，そのチャンネルのヒストグラムを計算します． 
+    // (3a)if the source image has single-channel, calculate its histogram
     calcHist(&src_img, 1, 0, Mat(), hist[0], 1, hdims, ranges, true, false);
     minMaxLoc(hist[0], 0, &max_val);
   } else {
-    // (3b)入力画像がマルチチャンネルの場合，画像をチャンネル毎に分割してヒストグラムを計算します． 
+    // (3b)if the souce image has multi-channel, calculate histogram of each plane
     for(int i=0; i<sch; ++i) {
       calcHist(&src_img, 1, &i, Mat(), hist[i], 1, hdims, ranges, true, false);
       double tmp_val;
@@ -40,7 +40,7 @@ main (int argc, char **argv)
     }
   }
 
-  // (4)ヒストグラムをスケーリングして，描画します． 
+  // (4)scale and draw the histogram(s)
   Scalar color = Scalar::all(100);
   for(int i=0; i<sch; i++) {
     if(sch==3)
@@ -55,7 +55,7 @@ main (int argc, char **argv)
     }
   }
 
-  // (5)ヒストグラム画像を表示，キーが押されたときに終了します． 
+  // (5)show the histogram iamge, and quit when any key pressed
   namedWindow("Image", CV_WINDOW_AUTOSIZE);
   namedWindow("Histogram", CV_WINDOW_AUTOSIZE);
   imshow("Image", src_img);

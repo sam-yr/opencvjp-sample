@@ -13,10 +13,11 @@ main (int argc, char **argv)
   IplImage *src_img = 0, *planes[4] = { 0, 0, 0, 0 }, *hist_img;
   CvHistogram *hist[3];
   char *imagename;
+  CvScalar color = cvScalarAll(100);
 
   // (1)load a source image as is 
   //    and allocate the same number of images and histogram structures as the channels
-  imagename = argc > 1 ? argv[1] : "flower.png";
+  imagename = argc > 1 ? argv[1] : "../image/flower.png";
   src_img = cvLoadImage(imagename, CV_LOAD_IMAGE_ANYCOLOR);
   if(src_img == 0)
     return -1;
@@ -47,7 +48,6 @@ main (int argc, char **argv)
 
    // (4)scale and draw the histogram(s)
   cvSet(hist_img, cvScalarAll (255), 0);
-  CvScalar color = cvScalarAll(100);
   for (i = 0; i < sch; i++) {
     if(sch==3)
       color = cvScalar((0xaa<<i*8)&0x0000ff,(0xaa<<i*8)&0x00ff00,(0xaa<<i*8)&0xff0000, 0);

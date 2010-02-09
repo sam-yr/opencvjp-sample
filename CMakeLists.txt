@@ -95,6 +95,7 @@ if(PKG_CONFIG_FOUND)
   if((NOT OPENCV_FOUND) OR (OPENCV_VERSION VERSION_LESS REQ_OPENCV_VER))
     message(FATAL_ERROR "Could not find OpenCV>=" ${REQ_OPENCV_VER})
   endif()
+  link_directories(${OPENCV_LIBRARY_DIRS})
 elseif(WIN32 AND MSVC)
   find_package(OPENCV REQUIRED)
   set(OPENCV_LIBRARIES optimized cxcore200 optimized cv200 optimized highgui200 optimized cvaux200)
@@ -112,6 +113,16 @@ elseif(WIN32 AND MSVC)
   string(REPLACE "/EHsc" "/EHsc-" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
   string(REPLACE "/EHsc" "/EHsc-" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
   string(REPLACE "/EHsc" "/EHsc-" CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
+
+  add_custom_target(ALL_BUILD)
+  add_custom_command(TARGET ALL_BUILD
+                     POST_BUILD
+                     COMMAND md .\\c\\image
+                     COMMAND md .\\cpp\\image
+                     COMMAND robocopy $(SolutionDir)\\image .\\c\\image
+                     COMMAND robocopy $(SolutionDir)\\image .\\cpp\\image
+                     )
+
 endif()
 add_subdirectory(c)
 add_subdirectory(cpp)

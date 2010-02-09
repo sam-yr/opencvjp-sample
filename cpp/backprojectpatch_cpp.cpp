@@ -7,8 +7,8 @@ int
 main (int argc, char **argv)
 {
   // (1)load a source image and a template image respectively
-  const char *imagename = argc > 1 ? argv[1] : "room7.png";
-  const char *templatename = argc > 2 ? argv[2] : "room7_temp.png";
+  const char *imagename = argc > 1 ? argv[1] : "../image/room7.png";
+  const char *templatename = argc > 2 ? argv[2] : "../image/room7_temp.png";
   Mat src_img = imread(imagename);
   Mat tmp_img = imread(templatename);
   if(!src_img.data || !tmp_img.data)
@@ -43,7 +43,7 @@ main (int argc, char **argv)
       Mat roi(src_hsv, roi_rect);
       calcHist(&roi, 1, channels, Mat(), src_hist, 1, hist_size, ranges, true);
       normalize(src_hist, src_hist, 1, 0, NORM_L1);
-      dst_img.at<float>(j, i) = compareHist(src_hist, tmp_hist, CV_COMP_CORREL);
+      dst_img.at<double>(j, i) = compareHist(src_hist, tmp_hist, CV_COMP_CORREL);
     }
   }
   

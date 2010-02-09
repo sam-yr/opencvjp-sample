@@ -1,4 +1,3 @@
-link_directories(${OPENCV_LIBRARY_DIRS})
 include_directories(${OPENCV_INCLUDE_DIRS})
 aux_source_directory("." SOURCES)
 

@@ -9,7 +9,7 @@ main (int argc, char **argv)
   const int cluster_count = 10; /* number of cluster */
 
   // (1)load a specified file as a 3-channel color image
-  const char *imagename = argc > 1 ? argv[1] : "boat.png";
+  const char *imagename = argc > 1 ? argv[1] : "../image/boat.png";
   Mat src_img = imread(imagename);
   if(!src_img.data)
     return -1;

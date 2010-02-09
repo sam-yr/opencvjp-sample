@@ -17,8 +17,8 @@ main (int argc, char **argv)
   char *imagename, *templatename;
 
   // (1)load a search-area image and a template image respectively
-  imagename = argc > 1 ? argv[1] : "room7.png";
-  templatename = argc > 2 ? argv[2] : "room7_temp.png";
+  imagename = argc > 1 ? argv[1] : "../image/room7.png";
+  templatename = argc > 2 ? argv[2] : "../image/room7_temp.png";
   src_img = cvLoadImage (imagename, CV_LOAD_IMAGE_COLOR);
   tmp_img = cvLoadImage (templatename, CV_LOAD_IMAGE_COLOR);
   if(src_img == 0 || tmp_img == 0)

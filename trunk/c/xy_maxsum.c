@@ -16,7 +16,7 @@ main(int argc, char *argv[])
 
   // (1)load a specified file as a 3-channel color image 
   //    and convert to agrayscale image
-  imagename = argc > 1 ? argv[1] : "../image/winter.png";
+  imagename = argc > 1 ? argv[1] : "../image/bean.png";
   src_img = cvLoadImage(imagename, CV_LOAD_IMAGE_COLOR);
   if(src_img == 0)
     return -1;

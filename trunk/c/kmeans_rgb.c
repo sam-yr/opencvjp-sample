@@ -3,7 +3,7 @@
 
 #define MAX_CLUSTERS (10) /* number of cluster */
 
-int main( int argc, char** argv )
+int main(int argc, char** argv)
 {
   int i, size;
   IplImage *src_img = 0, *dst_img = 0;
@@ -11,11 +11,14 @@ int main( int argc, char** argv )
   CvMat *clusters, *points, *tmp;
   CvMat *count = cvCreateMat( MAX_CLUSTERS, 1, CV_32SC1);
   CvMat *centers = cvCreateMat( MAX_CLUSTERS, 3, CV_32FC1);
+  char *imagename;
 
   // (1)load a specified file as a 3-channel color image
-  if(argc != 2 || (src_img = cvLoadImage (argv[1], CV_LOAD_IMAGE_COLOR))==0)
+  imagename = argc > 1 ? argv[1] : "../image/fruit.png";
+  src_img = cvLoadImage(imagename, CV_LOAD_IMAGE_COLOR);
+  if(src_img == 0)
     return -1;
-  
+
   size = src_img->width * src_img->height;
   dst_img  = cvCloneImage(src_img);
   clusters = cvCreateMat(size, 1, CV_32SC1 );

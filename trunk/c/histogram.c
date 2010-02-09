@@ -17,7 +17,7 @@ main (int argc, char **argv)
 
   // (1)load a source image as is 
   //    and allocate the same number of images and histogram structures as the channels
-  imagename = argc > 1 ? argv[1] : "../image/flower.png";
+  imagename = argc > 1 ? argv[1] : "../image/flower_color.png";
   src_img = cvLoadImage(imagename, CV_LOAD_IMAGE_ANYCOLOR);
   if(src_img == 0)
     return -1;

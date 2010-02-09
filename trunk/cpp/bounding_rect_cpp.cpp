@@ -1,24 +1,20 @@
 #include <cv.h>
 #include <highgui.h>
-#include <iostream>
-#include <stdio.h>
 
 using namespace cv;
 
 int
 main (int argc, char **argv)
 {
-
-  // (1)画像を確保し初期化します． 
+  // (1)allocate and initialize an image
   Mat img = Mat::zeros(Size(640, 480), CV_8UC3);
 
-  // (2)点列を生成します． 
+  // (2)generate a sequence of random 2d points
   Mat points1(Size(50, 1), CV_32SC2);
-  // randu(points1, Scalar(img.cols/4, img.rows/4), Scalar(img.cols*3./4., img.rows*3./4.));
+  /// randu(points1, Scalar(img.cols/4, img.rows/4), Scalar(img.cols*3./4., img.rows*3./4.));
   RNG(getTickCount()).fill(points1, RNG::UNIFORM, Scalar(img.cols/4, img.rows/4), Scalar(img.cols*3./4, img.rows*3./4));
-  std::cout << points1.elemSize() << std::endl;
 
-  // (3)点列を．描画します
+  // (3)draw the points as small circles
 #if 0
   vector<Mat> planes;
   split(points1, planes);
@@ -40,11 +36,11 @@ main (int argc, char **argv)
   }
 #endif
 
-  // (4)点列を包含する矩形を求めて描画します． 
+  // (4)calculate and draw a bounding rectangle of points
   Rect brect = boundingRect(points1);
   rectangle(img, brect.tl(), brect.br(), Scalar(0,0,255), 2);
 
-  // (5)画像を表示し，キーが押されたときに終了します． 
+  // (5)show the iamge, and quit when any key pressed
   namedWindow("img", CV_WINDOW_AUTOSIZE);
   imshow("img", img);
   waitKey(0);

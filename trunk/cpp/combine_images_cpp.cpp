@@ -11,7 +11,7 @@ main (int argc, char **argv)
   int total_width=0, max_height=0;  
   vector<Mat> src_img;
   
-  // (1)コマンド引数で指定された画像を全て読み込みます． 
+  // (1)load all images specified on the command line
   if(argc < 2) {
     return 0;
   } else {
@@ -25,7 +25,7 @@ main (int argc, char **argv)
     }
   }
 
-  // (2)画像を横方向に連結します． 
+  // (2)append images one after another
   Mat combined_img(Size(total_width, max_height), CV_8UC3);
   vector<Mat>::iterator it = src_img.begin(), it_end = src_img.end();
   Rect roi_rect;
@@ -37,7 +37,7 @@ main (int argc, char **argv)
     roi_rect.x += it->cols;
   }
 
-  // (3)画像を表示し，キーが押されたときに終了します． 
+  // (3)show the combined image, and quit when any key pressed
   namedWindow("Combined Image", CV_WINDOW_AUTOSIZE);
   imshow("Combined Image", combined_img);
   waitKey(0);

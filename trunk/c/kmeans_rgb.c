@@ -1,7 +1,7 @@
 #include <cv.h>
 #include <highgui.h>
 
-#define MAX_CLUSTERS (10) /* クラスタ数 */
+#define MAX_CLUSTERS (10) /* number of cluster */
 
 int main( int argc, char** argv )
 {
@@ -12,7 +12,7 @@ int main( int argc, char** argv )
   CvMat* count = cvCreateMat( MAX_CLUSTERS, 1, CV_32SC1);
   CvMat* centers = cvCreateMat( MAX_CLUSTERS, 3, CV_32FC1);
 
-  // (1)画像を読み込みます． 
+  // (1)load a specified file as a 3-channel color image
   if(argc != 2 || (src_img = cvLoadImage (argv[1], CV_LOAD_IMAGE_COLOR))==0)
     return -1;
   
@@ -21,7 +21,7 @@ int main( int argc, char** argv )
   clusters = cvCreateMat(size, 1, CV_32SC1 );
   points   = cvCreateMat( size, 1, CV_32FC3 );
 
-  // (2)ピクセルの値を行列へ代入します． 
+  // (2)reshape the image to be a 1 column matrix 
 #if 1
   CvMat tmp_header;
   CvMat *tmp = cvCreateMat(size, 1, CV_8UC3);
@@ -36,12 +36,12 @@ int main( int argc, char** argv )
   }
 #endif
   
-  // (3)k-meansクラスタリングを実行します．
+  // (3)run k-means clustering algorithm to segment pixels in RGB color space
   cvKMeans2( points, MAX_CLUSTERS, clusters,
 	     cvTermCriteria( CV_TERMCRIT_EPS+CV_TERMCRIT_ITER, 10, 1.0 ),
 	     1, 0, 0, centers, 0);
 
-  // (4)画素値を，それが属するクラスタの中心値で代表します． 
+  // (4)make a each centroid represent all pixels in the cluster
   for(i=0; i<size; i++) {
     int idx = clusters->data.i[i];
     dst_img->imageData[i*3+0] = (char)centers->data.fl[idx*3+0];
@@ -49,7 +49,7 @@ int main( int argc, char** argv )
     dst_img->imageData[i*3+2] = (char)centers->data.fl[idx*3+2];
   }
 
-  // (5)画像を表示，キーが押されたときに終了します． 
+  // (5)show source and destination image, and quit when any key pressed
   cvNamedWindow( "src", CV_WINDOW_AUTOSIZE);
   cvShowImage( "src", src_img );
   cvNamedWindow( "low-color", CV_WINDOW_AUTOSIZE);

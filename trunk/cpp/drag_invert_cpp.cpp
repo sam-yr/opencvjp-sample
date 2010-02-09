@@ -12,7 +12,7 @@ int
 main(int argc, char *argv[])
 { 
   // (1)load a source image as is
-  const char *imagename = argc > 1 ? argv[1] : "lenna.png";
+  const char *imagename = argc > 1 ? argv[1] : "../image/lenna.png";
   Mat src_img = imread(imagename, -1);
   if(!src_img.data)
     return -1;

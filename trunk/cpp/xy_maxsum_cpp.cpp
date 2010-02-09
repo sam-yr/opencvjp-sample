@@ -13,7 +13,7 @@ main(int argc, char *argv[])
 {
   // (1)load a specified file as a 3-channel color image 
   //    and convert to agrayscale image
-  const char *imagename = argc > 1 ? argv[1] : "vegas.png";
+  const char *imagename = argc > 1 ? argv[1] : "../image/vegas.png";
   src_img = imread(imagename);
   if(!src_img.data)
     return -1;

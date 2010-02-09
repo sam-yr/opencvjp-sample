@@ -7,10 +7,10 @@ int main( int argc, char** argv )
 {
   int i, size;
   IplImage *src_img = 0, *dst_img = 0;
-  CvMat* clusters;
-  CvMat* points;
-  CvMat* count = cvCreateMat( MAX_CLUSTERS, 1, CV_32SC1);
-  CvMat* centers = cvCreateMat( MAX_CLUSTERS, 3, CV_32FC1);
+  CvMat tmp_header;
+  CvMat *clusters, *points, *tmp;
+  CvMat *count = cvCreateMat( MAX_CLUSTERS, 1, CV_32SC1);
+  CvMat *centers = cvCreateMat( MAX_CLUSTERS, 3, CV_32FC1);
 
   // (1)load a specified file as a 3-channel color image
   if(argc != 2 || (src_img = cvLoadImage (argv[1], CV_LOAD_IMAGE_COLOR))==0)
@@ -23,8 +23,7 @@ int main( int argc, char** argv )
 
   // (2)reshape the image to be a 1 column matrix 
 #if 1
-  CvMat tmp_header;
-  CvMat *tmp = cvCreateMat(size, 1, CV_8UC3);
+  tmp = cvCreateMat(size, 1, CV_8UC3);
   tmp = cvReshape(src_img, &tmp_header, 0, size);
   cvConvert(tmp, points);
   cvReleaseMat(&tmp);

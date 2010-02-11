@@ -5,24 +5,21 @@ int
 main (int argc, char **argv)
 {
   int i, img_num;
+  const char defaultfile[2][32] = {"../image/moon.png", "../image/sunset.png"};
   int total_width=0, max_height=0;
   IplImage **src_img;
   IplImage *combined_img;
   CvRect roi = cvRect(0, 0, 0, 0);
 
   // (1)load all images specified on the command line
-  if(argc < 2) {
-    return 0;
-  } else {
-    img_num = argc - 1;
-    src_img = (IplImage**)cvAlloc(sizeof(IplImage*)*img_num);
-    for(i=0; i<img_num; i++) {
-      src_img[i] = cvLoadImage (argv[i+1], CV_LOAD_IMAGE_COLOR);
-      if(src_img[i] == 0)
-	return -1;
-      total_width += src_img[i]->width;
-      max_height = max_height < src_img[i]->height ? src_img[i]->height : max_height;
-    }
+  img_num = argc > 1 ? argc-1 : 2;
+  src_img = (IplImage**)cvAlloc(sizeof(IplImage*)*img_num);
+  for(i=0; i<img_num; i++) {
+    src_img[i] = cvLoadImage (argc-1?argv[i+1]:defaultfile[i], CV_LOAD_IMAGE_COLOR);
+    if(src_img[i] == 0)
+      return -1;
+    total_width += src_img[i]->width;
+    max_height = max_height < src_img[i]->height ? src_img[i]->height : max_height;
   }
 
   // (2)append images one after another

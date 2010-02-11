@@ -6,6 +6,7 @@ using namespace cv;
 Rect selection;
 int select_object;
 
+/* prototype declaration */
 void on_mouse(int event, int x, int y, int flags, void* param);
 
 int 
@@ -21,7 +22,7 @@ main(int argc, char *argv[])
   namedWindow("Image", 1);
   cvSetMouseCallback("Image", (CvMouseCallback)(&on_mouse), &src_img);
   
-  // (3)show the source image, and quit when 'esc' pressed
+  // (3)show the source image with an invert area, and quit when 'esc' pressed
   while(1) {
     Mat dst_img = src_img.clone();
     if(select_object && selection.width > 0 && selection.height > 0) {

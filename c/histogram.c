@@ -27,13 +27,14 @@ main (int argc, char **argv)
     hist[i] = cvCreateHist(1, &hist_size, CV_HIST_ARRAY, ranges, 1);
   }
 
-  // (2) allocate a histogram image
+  // (2)allocate IplImage to draw a histogram image
   hist_img = cvCreateImage(cvSize(ch_width * sch, 200), 8, 3);
+  cvSet(hist_img, cvScalarAll (255), 0);
 
   if (sch == 1) {
     // (3a)if the source image has single-channel, calculate its histogram
     cvCopy(src_img, planes[0], NULL);
-    cvCalcHist (&planes[0], hist[0], 0, NULL);
+    cvCalcHist(&planes[0], hist[0], 0, NULL);
     cvGetMinMaxHistValue (hist[0], 0, &max_val, 0, 0);
   } else {
     // (3b)if the souce image has multi-channel, aplit it and calculate histogram of each plane
@@ -47,7 +48,6 @@ main (int argc, char **argv)
   }
 
    // (4)scale and draw the histogram(s)
-  cvSet(hist_img, cvScalarAll (255), 0);
   for (i = 0; i < sch; i++) {
     if(sch==3)
       color = cvScalar((0xaa<<i*8)&0x0000ff,(0xaa<<i*8)&0x00ff00,(0xaa<<i*8)&0xff0000, 0);

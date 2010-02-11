@@ -14,7 +14,7 @@ int main(int argc, char** argv)
   char *imagename;
 
   // (1)load a specified file as a 3-channel color image
-  imagename = argc > 1 ? argv[1] : "../image/fruit.png";
+  imagename = argc > 1 ? argv[1] : "../image/boat.png";
   src_img = cvLoadImage(imagename, CV_LOAD_IMAGE_COLOR);
   if(src_img == 0)
     return -1;

@@ -14,7 +14,7 @@ main (int argc, char **argv)
   if(!src_img.data)
     return -1;
 
-  // (2)allocate a histogram image
+  // (2)allocate Mat to draw a histogram image
   const int ch_width = 260;
   const int sch = src_img.channels();
   Mat hist_img(Size(ch_width * sch, 200), CV_8UC3, Scalar::all(255));

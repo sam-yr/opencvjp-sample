@@ -43,7 +43,7 @@ main (int argc, char **argv)
       Mat roi(search_hsv, roi_rect);
       calcHist(&roi, 1, channels, Mat(), search_hist, 1, hist_size, ranges, true);
       normalize(search_hist, search_hist, 1, 0, NORM_L1);
-      dst_img.at<double>(j, i) = compareHist(search_hist, tmp_hist, CV_COMP_CORREL);
+      dst_img.at<float>(j, i) = saturate_cast<float>(compareHist(search_hist, tmp_hist, CV_COMP_CORREL));
     }
   }
   

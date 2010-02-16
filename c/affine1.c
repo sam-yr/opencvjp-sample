@@ -10,7 +10,7 @@ main(int argc, char **argv)
   char *imagename;
 
   // (1)load a specified file as a 3-channel color image,
-  //    allocate a destination image
+  //    and allocate a destination image
   imagename = argc > 1 ? argv[1] : "../image/fruit.png";
   src_img = cvLoadImage(imagename, CV_LOAD_IMAGE_COLOR);
   if(src_img == 0)

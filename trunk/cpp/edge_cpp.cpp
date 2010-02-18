@@ -28,7 +28,8 @@ main (int argc, char **argv)
   Mat canny_img;
   Canny(src_img, canny_img, 50, 200);
 
-  // (5)show original gray and their edge images respectively, and quit when any key pressed
+  // (5)show original gray and their edge images respectively, 
+  //    and quit when any key pressed
   namedWindow("Original(Grayscale)", CV_WINDOW_AUTOSIZE);
   namedWindow("Sobel", CV_WINDOW_AUTOSIZE);
   namedWindow("Laplacian", CV_WINDOW_AUTOSIZE);

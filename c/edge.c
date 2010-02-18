@@ -30,7 +30,8 @@ main (int argc, char **argv)
   // (4)implement the Canny algorithm for edge detection
   cvCanny(src_img, canny_img, 50.0, 200.0, 3);
 
-  // (5)show original gray and their edge images respectively, and quit when any key pressed
+  // (5)show original gray and their edge images respectively,
+  //    and quit when any key pressed
   cvNamedWindow("Original(GrayScale)", CV_WINDOW_AUTOSIZE);
   cvNamedWindow("Sobel", CV_WINDOW_AUTOSIZE);
   cvNamedWindow("Laplacian", CV_WINDOW_AUTOSIZE);

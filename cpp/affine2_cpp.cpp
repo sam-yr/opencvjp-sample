@@ -8,7 +8,7 @@ main(int argc, char **argv)
 {
   // (1)load a specified file as a 3-channel color image,
   //    set its ROI, and allocate a destination image
-  const char *imagename = argc > 1 ? argv[1] : "../image/vegas.png";
+  const char *imagename = argc > 1 ? argv[1] : "../image/building.png";
   Mat src_img = imread(imagename);
   if(!src_img.data)
     return -1;

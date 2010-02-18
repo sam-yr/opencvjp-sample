@@ -7,7 +7,6 @@ int
 main (int argc, char **argv)
 {
   // (1)load a specified file as a grayscale image
-  //    and allocate destination images
   const char *imagename = argc > 1 ? argv[1] : "../image/bike_sign.png";
   Mat src_img = imread(imagename, 0);
   if(!src_img.data)

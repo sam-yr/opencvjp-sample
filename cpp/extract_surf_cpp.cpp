@@ -8,7 +8,7 @@ using namespace std;
 using namespace cv;
 
 
-int main(int argc, char * argv[])
+int main(int argc, char *argv[])
 {
   // (1)load Color Image
   const char *imagename = argc > 1 ? argv[1] : "../image/lenna.png";

@@ -14,7 +14,7 @@ main (int argc, char **argv)
   src_img = cvLoadImage(imagename, CV_LOAD_IMAGE_GRAYSCALE);
   if(src_img == 0)
     return -1;
-  tmp_img = cvCreateImage(cvGetSize(src_img), IPL_DEPTH_16S, 1);
+  tmp_img = cvCreateImage(cvGetSize(src_img), IPL_DEPTH_32F, 1);
   sobel_img = cvCreateImage(cvGetSize(src_img), IPL_DEPTH_8U, 1);
   laplaian_img = cvCreateImage(cvGetSize(src_img), IPL_DEPTH_8U, 1);
   canny_img = cvCreateImage(cvGetSize(src_img), IPL_DEPTH_8U, 1);

@@ -12,8 +12,9 @@ main(int argc, char **argv)
   Mat src_img = imread(imagename);
   if(!src_img.data)
     return -1;
-
   Mat dst_img = src_img.clone();
+
+  // (2)set ROI
   Rect roi_rect(cvRound(src_img.cols*0.25), cvRound(src_img.rows*0.25), cvRound(src_img.cols*0.5), cvRound(src_img.rows*0.5));
   Mat src_roi(src_img, roi_rect);
   Mat dst_roi(dst_img, roi_rect);

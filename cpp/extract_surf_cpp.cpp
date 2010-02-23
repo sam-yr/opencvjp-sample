@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
     return -1;
 
   // (2)convert Color Image to Grayscale for Feature Extraction
-  Mat grayImage(colorImage.size(), CV_8UC1);
+  Mat grayImage;
   cvtColor(colorImage, grayImage, CV_BGR2GRAY);
 
   // (3)initialize SURF class
@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
   vector<float> desc_vec;		
   calc_surf(grayImage, Mat(), kp_vec, desc_vec);
 
-  // (5)draw Key Points
+  // (5)draw keypoints
   cout << "Image Keypoints: " << kp_vec.size() << endl;
 #if 1
   vector<KeyPoint>::iterator it = kp_vec.begin(), it_end = kp_vec.end();

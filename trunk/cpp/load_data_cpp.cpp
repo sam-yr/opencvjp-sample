@@ -28,7 +28,7 @@ main (int argc, char **argv)
 		cv::read(fn[i], mat[i]);
 	}
 
-	// (5)print loaded data
+	// (4)print loaded data
 	cout << "a:" << a << endl;
 	cout << "b:" << b << endl;
 

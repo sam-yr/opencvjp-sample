@@ -1,6 +1,5 @@
 #include <cv.h>
 #include <highgui.h>
-#include <vector>
 
 using namespace cv;
 

@@ -14,10 +14,10 @@ main (int argc, char **argv)
   Mat rnum(Size(rect_num*2,1), CV_32SC2);
   RNG(getTickCount()).fill(rnum, RNG::UNIFORM, Scalar(img.cols/8, img.rows/8), Scalar(img.cols*7./8, img.rows*7./8));
   
-  // (3)draw rectangles based on generated coordinates
+  // (3)draw rectangles based on generated random coordinates
   vector<Rect> inner;
-  MatIterator_<Vec2i> itp = rnum.begin<Vec2i>(), itp_end = rnum.end<Vec2i>();
-  for(; itp!=itp_end; itp+=2) {
+  MatIterator_<Vec2i> itp = rnum.begin<Vec2i>();
+  for(; itp!=rnum.end<Vec2i>(); itp+=2) {
     Point a((*itp)[0], (*itp)[1]), b((*(itp+1))[0], (*(itp+1))[1]);
     rectangle(img, a, b, Scalar(200,200,255), 2);
     inner.push_back(Rect(a, b));

@@ -58,6 +58,10 @@ if(MSVC)
 endif()
 
 if(CMAKE_COMPILER_IS_GNUCXX)
+    # Whole program optimization
+    if(OPENCV_WHOLE_PROGRAM_OPTIMIZATION)
+        set(EXTRA_C_FLAGS_RELEASE "${EXTRA_C_FLAGS_RELEASE} -fwhole-program --combine")
+    endif()
     #set(EXTRA_C_FLAGS "${EXTRA_C_FLAGS} -Wall")
     # Parallel mode
     if(ENABLE_OPENMP)

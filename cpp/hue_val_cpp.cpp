@@ -23,8 +23,7 @@ main (int argc, char **argv)
   Mat hsv_img(img, roi_rect);
 #endif
   std::cout << "step:" << hsv_img.step << ", size:" << w*3 << std::endl;
-
-  double c, f = getTickFrequency();
+  double c, f = getTickFrequency()/1000;
   int width = hsv_img.cols, height = hsv_img.rows;
 
   // (2a)create hue-value gradation image
@@ -125,8 +124,8 @@ main (int argc, char **argv)
   
   // (3)show created gradation image
   cvtColor(hsv_img, img, CV_HSV2BGR);
-  namedWindow("gradation", CV_WINDOW_AUTOSIZE);
-  imshow("gradation", img);
+  namedWindow("Garadation", CV_WINDOW_AUTOSIZE);
+  imshow("Gradation", img);
   waitKey(0);
   
   return 0;

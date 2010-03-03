@@ -8,6 +8,7 @@ main (int argc, char **argv)
 {
   // (1)allocate and initialize an image
   Mat img = Mat::zeros(Size(640, 480), CV_8UC3);
+  if(!img.data) return -1;
 
   // (2)generate a sequence of random 2d points
   Mat points(Size(50, 1), CV_32SC2);

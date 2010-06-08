@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <cv.h>
 #include <highgui.h>
 
@@ -32,7 +33,7 @@ main(int argc, char *argv[])
     
     imshow("Image", dst_img);
     int key = waitKey(10);
-    if(key==27)
+    if((key&0xff)==27)
       break;
   }
 

@@ -8,7 +8,7 @@ main(int argc, char **argv)
 {
   // (1)load a specified file and convert it into grayscale image
   const char *imagename = argc > 1 ? argv[1] : "../image/trains.png";
-  Mat src_img = imread(imagename, 1);
+  Mat src_img = imread(imagename);
   if(!src_img.data)
     return -1;
   Mat gray_img;

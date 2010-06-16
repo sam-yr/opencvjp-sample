@@ -22,7 +22,8 @@ main (int argc, char **argv)
   Rect roi_rect(0,0,w,h);
   Mat hsv_img(img, roi_rect);
 #endif
-  std::cout << "step:" << hsv_img.step << ", size:" << w*3 << std::endl;
+  int ch = img.channels(); // =3
+  std::cout << "step:" << hsv_img.step << ", size:" << w*ch << std::endl;
   double c, f = getTickFrequency()/1000;
   int width = hsv_img.cols, height = hsv_img.rows;
 
@@ -30,7 +31,7 @@ main (int argc, char **argv)
   c = getTickCount();
   for(int y=0; y<height; ++y) {
     for(int x=0; x<width; ++x) {
-      int a = hsv_img.step*y+(x*3);
+      int a = hsv_img.step*y+(x*ch);
       hsv_img.data[a+0] = (x*180/width);
       hsv_img.data[a+1] = 255;
       hsv_img.data[a+2] = ((height-y)*255/height);
@@ -43,9 +44,9 @@ main (int argc, char **argv)
   for(int y=0; y<height; ++y) {
     uchar *p = hsv_img.ptr(y);
     for(int x=0; x<width; ++x) {
-      p[x*3+0] = (x*180/width);
-      p[x*3+1] = 255;
-      p[x*3+2] = ((height-y)*255/height);
+      p[x*ch+0] = (x*180/width);
+      p[x*ch+1] = 255;
+      p[x*ch+2] = ((height-y)*255/height);
     }
   }
   std::cout << (getTickCount()-c)/f << "\t";
@@ -59,9 +60,9 @@ main (int argc, char **argv)
   for(int y=0; y<height; ++y) {
     uchar *p = hsv_img.ptr(y);
     for(int x=0; x<width; ++x) {
-      p[x*3+0] = (x*180/width);
-      p[x*3+1] = 255;
-      p[x*3+2] = ((height-y)*255/height);
+      p[x*ch+0] = (x*180/width);
+      p[x*ch+1] = 255;
+      p[x*ch+2] = ((height-y)*255/height);
     }
   }
   std::cout << (getTickCount()-c)/f << "\t";

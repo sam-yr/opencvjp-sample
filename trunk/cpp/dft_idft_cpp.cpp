@@ -18,12 +18,12 @@ public:
   DftIdftApp(const string filename);
   ~DftIdftApp(){};
   void calcMagImage();
-  void showOrgImage();
-  void showMagImage();
-  void showIDFTImage();
+  void showOrgImage(){imshow(org_win, src_img);}
+  void showMagImage(){imshow(mag_win, mag_img);}
+  void showIDFTImage(){imshow(idft_win, idft_img);}
   void shiftDFT(Mat &src, Mat &dst);
   void calcIDFT(bool all=false);
-  void clear();
+  void clear(){idft_img.setTo(0);}
   static void onMouse(int event, int x, int y, int flags, void* param);
 };
 
@@ -48,13 +48,6 @@ DftIdftApp::DftIdftApp(const string filename)
   namedWindow(mag_win, CV_WINDOW_AUTOSIZE);
   namedWindow(idft_win, CV_WINDOW_AUTOSIZE);
   cvSetMouseCallback(mag_win.c_str(), DftIdftApp::onMouse, this);
-}
-
-void
-DftIdftApp::clear()
-{
-  idft_img.setTo(0);
-  calcMagImage();
 }
 
 void
@@ -93,14 +86,14 @@ DftIdftApp::shiftDFT(Mat &src, Mat& dst)
   int cx = src.cols/2;
   int cy = src.rows/2;
   
-  Mat q1(src, Rect(0,0,cx,cy));
-  Mat q2(src, Rect(cx,0,cx,cy));
-  Mat q3(src, Rect(cx,cy,cx,cy));
-  Mat q4(src, Rect(0,cy,cx,cy));
-  Mat d1(dst, Rect(0,0,cx,cy));
-  Mat d2(dst, Rect(cx,0,cx,cy));
-  Mat d3(dst, Rect(cx,cy,cx,cy));
-  Mat d4(dst, Rect(0,cy,cx,cy));
+  Mat q1(src, Rect(cx,0,cx,cy));
+  Mat q2(src, Rect(0,0,cx,cy));
+  Mat q3(src, Rect(0,cy,cx,cy));
+  Mat q4(src, Rect(cx,cy,cx,cy));
+  Mat d1(dst, Rect(cx,0,cx,cy));
+  Mat d2(dst, Rect(0,0,cx,cy));
+  Mat d3(dst, Rect(0,cy,cx,cy));
+  Mat d4(dst, Rect(cx,cy,cx,cy));
   
   q3.copyTo(tmp);
   q1.copyTo(d3);
@@ -108,24 +101,6 @@ DftIdftApp::shiftDFT(Mat &src, Mat& dst)
   q4.copyTo(tmp);
   q2.copyTo(d4);
   tmp.copyTo(d2);
-}
-
-void
-DftIdftApp::showMagImage()
-{
-  imshow(mag_win, mag_img);
-}
-
-void
-DftIdftApp::showOrgImage()
-{
-  imshow(org_win, src_img);
-}
-
-void
-DftIdftApp::showIDFTImage()
-{
-  imshow(idft_win, idft_img);
 }
 
 void
@@ -148,7 +123,7 @@ DftIdftApp::onMouse(int event, int x, int y, int flags, void* param)
   case CV_EVENT_MOUSEMOVE:
     if((flags&CV_EVENT_FLAG_LBUTTON)==0) return;
   case CV_EVENT_LBUTTONUP:
-    if(flags&CV_EVENT_FLAG_CTRLKEY) {
+    if(flags&CV_EVENT_FLAG_CTRLKEY) { // with CTRL
       int step = 5;
       for(int j=-step; j<=step; j++) {
         my = y+j;
@@ -166,7 +141,7 @@ DftIdftApp::onMouse(int event, int x, int y, int flags, void* param)
           mag[x+i] = 0;
         }
       }
-    } else {
+    } else {  // without CTRL
       mx += x<cx ? cx:-cx;
       my += y<cy ? cy:-cy;
       double *from = dft_dst.ptr<double>(my);
@@ -180,8 +155,7 @@ DftIdftApp::onMouse(int event, int x, int y, int flags, void* param)
   default:
     return;
   }
-  app->calcIDFT();
-  
+  app->calcIDFT();  
 }
 
 void
@@ -225,6 +199,7 @@ main(int argc, char *argv[])
       break;
     case 'r':
       app.clear();
+      app.calcMagImage();
       break;
     }
     app.showIDFTImage();
@@ -233,4 +208,3 @@ main(int argc, char *argv[])
 
   return 0;
 }
-

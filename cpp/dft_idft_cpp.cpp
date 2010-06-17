@@ -5,6 +5,7 @@
 using namespace cv;
 using namespace std;
 
+// class declaration
 class DftIdftApp {
 private:
   Mat src_img, mag_img;
@@ -12,8 +13,8 @@ private:
   Mat zero, dft_src, dft_dst, dft_dst_p;
   Mat idft_img;
   vector<Mat> mv;
-  double min, max;
   string org_win, mag_win, idft_win;
+  int src_cols, src_rows, dft_cols, dft_rows;
 public:
   DftIdftApp(const string filename);
   ~DftIdftApp(){};
@@ -27,6 +28,7 @@ public:
   static void onMouse(int event, int x, int y, int flags, void* param);
 };
 
+// constructor
 DftIdftApp::DftIdftApp(const string filename)
   :org_win("Original"), mag_win("Magnitude"), idft_win("IDTF")
 {
@@ -34,6 +36,8 @@ DftIdftApp::DftIdftApp(const string filename)
   if(!src_img.data) return;
 
   Size s_size = src_img.size();
+  src_cols = s_size.width;
+  src_rows = s_size.height;
   Re_img = Mat(s_size, CV_64F);
   Im_img = Mat::zeros(s_size, CV_64F);
   Complex_img = Mat(s_size, CV_64FC2);
@@ -50,74 +54,64 @@ DftIdftApp::DftIdftApp(const string filename)
   cvSetMouseCallback(mag_win.c_str(), DftIdftApp::onMouse, this);
 }
 
+// calc magnitude image
 void
 DftIdftApp::calcMagImage()
 {
-  int dft_M = getOptimalDFTSize(src_img.rows-1);
-  int dft_N = getOptimalDFTSize(src_img.cols-1);
-  dft_src = Mat(dft_M, dft_N, CV_64FC2);
+  dft_rows = getOptimalDFTSize(src_rows-1);
+  dft_cols = getOptimalDFTSize(src_cols-1);
+  dft_src = Mat::zeros(dft_rows, dft_cols, CV_64FC2);
   
-  Mat roi(dft_src, Rect(0, 0, src_img.cols, src_img.rows));
+  Mat roi(dft_src, Rect(0, 0, src_cols, src_rows));
   Complex_img.copyTo(roi);
-  if(dft_src.cols > src_img.cols) {
-    roi = Mat(dft_src, Rect(src_img.cols, 0, dft_src.cols-src_img.cols, src_img.rows));
-    roi.setTo(0);
-  }
 
   dft(dft_src, dft_dst);
-  dft_dst_p = dft_dst.clone();
-  dft_dst_p.setTo(0);
+  dft_dst_p = Mat::zeros(dft_dst.size(), dft_dst.type());
 
-  pow(dft_dst, 2.0, dft_src);
-  split(dft_src, mv);
-  pow(mv[0]+mv[1], 0.5, mv[0]); // mag=sqrt(Re^2+Im^2)
-  log(mv[0]+1, mv[0]);          // log(mag+1)
+  split(dft_dst.mul(dft_dst), mv);
+  sqrt(mv[0]+mv[1], mv[0]);
+  log(mv[0]+1, mv[0]);
 
   shiftDFT(mv[0], mv[0]);
 
+  double min, max;
   minMaxLoc(mv[0], &min, &max);
   mag_img = mv[0]*1.0/(max-min) - 1.0*min/(max-min);
 }
 
+// swap 1,3 and 2,4 quadrant respectively
 void
 DftIdftApp::shiftDFT(Mat &src, Mat& dst)
 {
   Mat tmp;
   int cx = src.cols/2;
   int cy = src.rows/2;
-  
-  Mat q1(src, Rect(cx,0,cx,cy));
-  Mat q2(src, Rect(0,0,cx,cy));
-  Mat q3(src, Rect(0,cy,cx,cy));
-  Mat q4(src, Rect(cx,cy,cx,cy));
-  Mat d1(dst, Rect(cx,0,cx,cy));
-  Mat d2(dst, Rect(0,0,cx,cy));
-  Mat d3(dst, Rect(0,cy,cx,cy));
-  Mat d4(dst, Rect(cx,cy,cx,cy));
-  
-  q3.copyTo(tmp);
-  q1.copyTo(d3);
-  tmp.copyTo(d1);
-  q4.copyTo(tmp);
-  q2.copyTo(d4);
-  tmp.copyTo(d2);
+
+  for(int i=0; i<=cx; i+=cx) {
+    Mat qs(src, Rect(i^cx,0,cx,cy));
+    Mat qd(dst, Rect(i,cy,cx,cy));
+    qs.copyTo(tmp);
+    qd.copyTo(qs);
+    tmp.copyTo(qd);
+  }
 }
 
+// mouse event callback
 void
 DftIdftApp::onMouse(int event, int x, int y, int flags, void* param)
 {
   DftIdftApp *app = static_cast<DftIdftApp*>(param);
-  Mat &dft_src = app->dft_src;
+  //Mat &dft_src = app->dft_src;
   Mat &dft_dst = app->dft_dst;
   Mat &dft_dst_p = app->dft_dst_p;
-  Mat &idft_img = app->idft_img;
+  //Mat &idft_img = app->idft_img;
   Mat &mag_img = app->mag_img;
-  vector<Mat> &mv = app->mv;
-  int cx = app->src_img.cols/2;
-  int cy = app->src_img.rows/2;
+  //vector<Mat> &mv = app->mv;
+  int cx = app->src_cols/2;
+  int cy = app->src_rows/2;
   int mx=x, my=y;
-  int w = dft_src.cols;
-  int h = dft_src.rows;
+  int w = app->dft_cols;
+  int h = app->dft_rows;
 
   switch(event) {
   case CV_EVENT_MOUSEMOVE:
@@ -126,15 +120,13 @@ DftIdftApp::onMouse(int event, int x, int y, int flags, void* param)
     if(flags&CV_EVENT_FLAG_CTRLKEY) { // with CTRL
       int step = 5;
       for(int j=-step; j<=step; j++) {
-        my = y+j;
-        my += (y+j)<cy ? cy:-cy;
+        my = y+j + ((y+j)<cy ? cy:-cy);
         if(y+j<0 || y+j>=h) continue;
         double *from = dft_dst.ptr<double>(my);
         double *to = dft_dst_p.ptr<double>(my);
         double *mag = mag_img.ptr<double>(y+j);
         for(int i=-step; i<=step; i++) {
-          mx = x+i;
-          mx += (x+i)<cx ? cx:-cx;
+          mx = x+i + ((x+i)<cx ? cx:-cx);
           if(x+i<0 || x+i>=w) break;
           to[(mx)*2+0] = from[(mx)*2+0];
           to[(mx)*2+1] = from[(mx)*2+1];
@@ -158,6 +150,7 @@ DftIdftApp::onMouse(int event, int x, int y, int flags, void* param)
   app->calcIDFT();  
 }
 
+// Inverse Discrete Fourier Transforma
 void
 DftIdftApp::calcIDFT(bool all)
 {
@@ -170,7 +163,7 @@ DftIdftApp::calcIDFT(bool all)
   idft(dft_dst_p, dft_src);
   split(dft_src, mv);
   minMaxLoc(mv[0], &min, &max);
-  idft_img = Mat(mv[0]*1.0/max, Rect(0, 0, src_img.cols, src_img.rows));
+  idft_img = Mat(mv[0]*1.0/max, Rect(0, 0, src_cols, src_rows));
 }
 
 int
@@ -192,12 +185,12 @@ main(int argc, char *argv[])
   while(1) {
     int c = waitKey(10);
     switch((char)c) {
-    case '\x1b':
+    case '\x1b': // exit
       return 0;
-    case 'a':
+    case 'a': // IDFT all
       app.calcIDFT(true);
       break;
-    case 'r':
+    case 'r': // reset
       app.clear();
       app.calcMagImage();
       break;

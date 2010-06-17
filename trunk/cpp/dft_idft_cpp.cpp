@@ -79,7 +79,7 @@ DftIdftApp::calcMagImage()
   mag_img = mv[0]*1.0/(max-min) - 1.0*min/(max-min);
 }
 
-// swap 1,3 and 2,4 quadrant respectively
+// swap 1,3 and 2,4 quadrants respectively
 void
 DftIdftApp::shiftDFT(Mat &src, Mat& dst)
 {
@@ -101,12 +101,9 @@ void
 DftIdftApp::onMouse(int event, int x, int y, int flags, void* param)
 {
   DftIdftApp *app = static_cast<DftIdftApp*>(param);
-  //Mat &dft_src = app->dft_src;
   Mat &dft_dst = app->dft_dst;
   Mat &dft_dst_p = app->dft_dst_p;
-  //Mat &idft_img = app->idft_img;
   Mat &mag_img = app->mag_img;
-  //vector<Mat> &mv = app->mv;
   int cx = app->src_cols/2;
   int cy = app->src_rows/2;
   int mx=x, my=y;
@@ -117,7 +114,7 @@ DftIdftApp::onMouse(int event, int x, int y, int flags, void* param)
   case CV_EVENT_MOUSEMOVE:
     if((flags&CV_EVENT_FLAG_LBUTTON)==0) return;
   case CV_EVENT_LBUTTONUP:
-    if(flags&CV_EVENT_FLAG_CTRLKEY) { // with CTRL
+    if(flags&CV_EVENT_FLAG_CTRLKEY) { // LeftButton+CTRL
       int step = 5;
       for(int j=-step; j<=step; j++) {
         my = y+j + ((y+j)<cy ? cy:-cy);
@@ -133,7 +130,7 @@ DftIdftApp::onMouse(int event, int x, int y, int flags, void* param)
           mag[x+i] = 0;
         }
       }
-    } else {  // without CTRL
+    } else {  // LeftButton
       mx += x<cx ? cx:-cx;
       my += y<cy ? cy:-cy;
       double *from = dft_dst.ptr<double>(my);

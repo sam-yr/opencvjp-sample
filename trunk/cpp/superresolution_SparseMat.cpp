@@ -1,6 +1,6 @@
 //Super resolution with Bilateral Total Variation
 //Implimentation of a paper;
-//Farsiu, S.,Robinson, D., Elad, M., Milanfar, P.ÅhFast and robust multiframe super resolution,Åh IEEETrans.ImageProcessing 13 (2004)1327?1344.
+//Farsiu, S.,Robinson, D., Elad, M., Milanfar, P."Fast and robust multiframe super resolution," IEEETrans.ImageProcessing 13 (2004)1327?1344.
 
 #include <cv.h>
 #include <highgui.h>
@@ -124,6 +124,7 @@ void superresolutionSparseMat32f(Mat src[], Mat& dest, SparseMat DHF[], const in
 		if(lambda>0.0) btvregularization(dstvec,reg_window,alpha,reg_vec,dest.size());
 
 #pragma omp parallel for
+          //(5-2) data term
 		for(int n=0;n<numofview;n++)
 		{
 			//degrade current estimated image
@@ -148,6 +149,7 @@ void superresolutionSparseMat32f(Mat src[], Mat& dest, SparseMat DHF[], const in
 
 		dstvec.reshape(3,dest.rows).convertTo(dest,CV_8UC3);
 
+          //(5-3)get PSNR and show current image
 		cout<<"PSNR"<<getPSNR(dest,ideal,10)<<"dB"<<endl;
 		
 		char name[64];

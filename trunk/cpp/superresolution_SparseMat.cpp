@@ -1,9 +1,12 @@
 //Super resolution with Bilateral Total Variation
 //Implimentation of a paper;
-//Farsiu, S.,Robinson, D., Elad, M., Milanfar, P."Fast and robust multiframe super resolution," IEEETrans.ImageProcessing 13 (2004)1327?1344.
+//Farsiu, S.,Robinson, D., Elad, M., Milanfar, P.ÅhFast and robust multiframe super resolution,Åh IEEETrans.ImageProcessing 13 (2004)1327?1344.
 
 #include <cv.h>
 #include <highgui.h>
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 using namespace cv;
 
 #include <iostream>
@@ -12,7 +15,6 @@ using namespace std;
 //sparse matrix and matrix function
 void mulSparseMat32f(SparseMat& smat, Mat& src, Mat& dest, bool isTranspose = false);
 Mat visualizeSparseMat(SparseMat& smat, Size out_imsize);
-inline float sign(float a, float b);
 void subtract_sign(Mat& src1, Mat&src2, Mat& dest);//dest = sign(src1-src2);
 
 //image processing
@@ -25,17 +27,25 @@ SparseMat createDownsampledMotionandBlurCCDSparseMat32f(Mat& src, int amp, Point
 SparseMat createDegradedImageandSparseMat32F(Mat& src, Mat& dest, Point2d move, int amp);
 void btvregularization(Mat& srcVec, Size kernel, float alpha, Mat& dstVec, Size size);
 
+#define sign_float(a,b) (a>b)?1.0f:(a<b)?-1.0f:0.0f
+
 enum
 {
 	SR_DATA_L1=0,
 	SR_DATA_L2
 };
-//Bilateral Total Variation
+
+//Bilateral Total Variation based Super resolution with 
 void superresolutionSparseMat32f(Mat src[], Mat& dest, SparseMat DHF[], const int numofview,int iteration, float beta, float lambda, float alpha, Size reg_window,int method, Mat& ideal);
 
 int main(int argc, char** argv)
 {
 	Mat image = imread("lenna.png");//input image
+	if(image.empty())
+	{
+		cout<<"invalid image name"<<endl;
+			return -1;
+	}
 	Mat dest = Mat(image.size(),CV_8UC3);
 
 	const int image_count = 16;//number of input images for super resolution
@@ -51,14 +61,13 @@ int main(int argc, char** argv)
 	for(int i=0;i<image_count;i++)
 	{	
 		cout<<i<<endl;
-		move[i].x=rnd.uniform(0.0,4.0);//randam shift for x
-		move[i].y=rnd.uniform(0.0,4.0);//randam shift for y
+		move[i].x=rnd.uniform(0.0,(double)rfactor);//randam shift for x
+		move[i].y=rnd.uniform(0.0,(double)rfactor);//randam shift for y
 		if(i==0)// fix first image
 		{
 			move[i].x=0;
 			move[i].y=0;
 		}
-
 		Mat imtemp(image.rows/rfactor,image.cols/rfactor,CV_8UC3);
 		degimage[i].create(image.rows/rfactor,image.cols/rfactor,CV_8UC3);
 
@@ -70,7 +79,7 @@ int main(int argc, char** argv)
 		char name[32];
 		sprintf(name,"input%03d.png",i);
 		imwrite(name,degimage[i]);
-		waitKey(1);
+		waitKey(30);
 	}
 
 	//(2) super resolution
@@ -85,11 +94,23 @@ int main(int argc, char** argv)
 		0.7f,//alpha
 		Size(7,7),//btv kernel size
 		SR_DATA_L1,//L1 norm minimization for data term
-		image);//ideal image for evaluation
+		image);//ideal image for evaluation	
 	return 0;
 }
 
-
+void sum_float_OMP(Mat src[], Mat& dest, int numofview, float beta)
+{
+	for(int n=0;n<numofview;n++)
+	{
+#pragma omp parallel for
+		for(int j=0;j<dest.rows;j++)
+		{
+			dest.ptr<float>(j)[0]-=beta*src[n].ptr<float>(j)[0];
+			dest.ptr<float>(j)[1]-=beta*src[n].ptr<float>(j)[1];
+			dest.ptr<float>(j)[2]-=beta*src[n].ptr<float>(j)[2];
+		}
+	}
+}
 void superresolutionSparseMat32f(Mat src[], Mat& dest, SparseMat DHF[], const int numofview,int iteration, float beta, float lambda, float alpha, Size reg_window,int method, Mat& ideal)
 {
 	//(3) create initial image by simple linear interpolation
@@ -112,19 +133,20 @@ void superresolutionSparseMat32f(Mat src[], Mat& dest, SparseMat DHF[], const in
 
 		dstvectemp[n]=dstvec.clone();
 	}
-	Mat reg_vec(3,dest.rows*dest.cols,CV_32FC3);//regularization vector
+	
+	Mat reg_vec=Mat::zeros(dest.rows*dest.cols,1,CV_32FC3);//regularization vector
 
 	//(5)steepest descent method for L1 norm minimization
 	for(int i=0;i<iteration;i++)
 	{
 		cout<<"iteration"<<i<<endl;
+		int64 t = getTickCount();
 		Mat diff=Mat::zeros(dstvec.size(),CV_32FC3);
 
 		//(5-1)btv
 		if(lambda>0.0) btvregularization(dstvec,reg_window,alpha,reg_vec,dest.size());
 
 #pragma omp parallel for
-          //(5-2) data term
 		for(int n=0;n<numofview;n++)
 		{
 			//degrade current estimated image
@@ -133,23 +155,37 @@ void superresolutionSparseMat32f(Mat src[], Mat& dest, SparseMat DHF[], const in
 			//compere input and degraded image
 			Mat temp(src[0].cols*src[0].rows,1, CV_32FC3);
 			if(method==SR_DATA_L1)
+			{
 				subtract_sign(svec2[n], svec[n],temp);
+			}
 			else
-				temp = svec2[n]- svec[n];
+			{
+				subtract(svec2[n],svec[n],temp);
+				//temp = svec2[n]- svec[n]; //supported in OpenCV2.1
+			}
 
 			//blur the subtructed vector with transposed matrix
 			mulSparseMat32f(DHF[n],temp,dstvectemp[n],true);
 		}
 		//creep ideal image, beta is parameter of the creeping speed.
+
+		sum_float_OMP(dstvectemp,dstvec,numofview,beta);
+		/*
 		for(int n=0;n<numofview;n++)
-			dstvec -= (beta*dstvectemp[n]);
+		{
+			addWeighted(dstvec,1.0,dstvectemp[n],-beta,0.0,dstvec);
+			//dstvec -= (beta*dstvectemp[n]);//supported in OpenCV2.1
+		}*/
 
 		//add smoothness term
-		if(lambda>0.0) dstvec -=lambda*beta*reg_vec;
+		if(lambda>0.0)
+		{
+			addWeighted(dstvec,1.0,reg_vec,-beta*lambda,0.0,dstvec);
+			//dstvec -=lambda*beta*reg_vec;
+		}
 
+		//show SR imtermediate process information. these processes does not be required at actural implimentation.
 		dstvec.reshape(3,dest.rows).convertTo(dest,CV_8UC3);
-
-          //(5-3)get PSNR and show current image
 		cout<<"PSNR"<<getPSNR(dest,ideal,10)<<"dB"<<endl;
 		
 		char name[64];
@@ -157,9 +193,11 @@ void superresolutionSparseMat32f(Mat src[], Mat& dest, SparseMat DHF[], const in
 		putText(dest,name,Point(15,50), FONT_HERSHEY_DUPLEX,1.5,CV_RGB(255,255,255),2);
 
 		sprintf(name,"iteration%04d.png",i);
-		imshow("SRimage",dest);waitKey(1);
+		imshow("SRimage",dest);waitKey(30);
 		imwrite(name,dest);
+		cout<<"time/iteration"<<(getTickCount()-t)*1000.0/getTickFrequency()<<"ms"<<endl;
 	}
+	
 	//re-convert  1D vecor structure to Mat image structure
 	dstvec.reshape(3,dest.rows).convertTo(dest,CV_8UC3);
 	imwrite("sr.png",dest);
@@ -204,9 +242,9 @@ void btvregularization(Mat& srcVec, Size kernel, float alpha, Mat& dstVec, Size 
 				float* ss = src.ptr<float>(j+m);
 				for(int l=kw;l+m>=0;l--)
 				{
-					r+=weight[count]*(sign(sr,ss[3*(i+l)+0]) -sign(s2[3*(i-l)+0],sr));
-					g+=weight[count]*(sign(sg,ss[3*(i+l)+1]) -sign(s2[3*(i-l)+1],sg));
-					b+=weight[count]*(sign(sb,ss[3*(i+l)+2]) -sign(s2[3*(i-l)+2],sb));
+					r+=weight[count]*(sign_float(sr,ss[3*(i+l)+0]) -sign_float(s2[3*(i-l)+0],sr));
+					g+=weight[count]*(sign_float(sg,ss[3*(i+l)+1]) -sign_float(s2[3*(i-l)+1],sg));
+					b+=weight[count]*(sign_float(sb,ss[3*(i+l)+2]) -sign_float(s2[3*(i-l)+2],sb));
 					count++;
 				}
 			}
@@ -283,23 +321,15 @@ SparseMat createDegradedImageandSparseMat32F(Mat& src, Mat& dest, Point2d move, 
 
 	mulSparseMat32f(DHF,svec,dvec);
 
-	imshow("smat",visualizeSparseMat(DHF,Size(512,512/amp/amp)));waitKey(1);
+	imshow("smat",visualizeSparseMat(DHF,Size(512,512/amp/amp)));waitKey(30);
 	//re-convert  1D vecor structure to Mat image structure
 	dvec.reshape(3,dest.rows).convertTo(dest,CV_8UC3);
 
 	return DHF;
 }
 
-inline float sign(float a, float b)
-{
-	if(a>b) return 1.0f;
-	else if(a<b)return -1.0f;
-	else return 0.0f;
-}
-
 void subtract_sign(Mat& src1, Mat&src2, Mat& dest)
 {	
-#pragma omp parallel for
 	for(int j=0;j<src1.rows;j++)
 	{
 		float* s1 = src1.ptr<float>(j);
@@ -307,9 +337,9 @@ void subtract_sign(Mat& src1, Mat&src2, Mat& dest)
 		float* d = dest.ptr<float>(j);
 		for(int i=0;i<src1.cols;i++)
 		{
-			d[3*i]=sign(s1[3*i],s2[3*i]);
-			d[3*i+1]=sign(s1[3*i+1],s2[3*i+1]);
-			d[3*i+2]=sign(s1[3*i+2],s2[3*i+2]);
+			d[3*i]=sign_float(s1[3*i],s2[3*i]);
+			d[3*i+1]=sign_float(s1[3*i+1],s2[3*i+1]);
+			d[3*i+2]=sign_float(s1[3*i+2],s2[3*i+2]);
 		}
 	}
 }
@@ -342,28 +372,28 @@ Mat visualizeSparseMat(SparseMat& smat, Size out_imsize)
 }
 
 void addgaussnoise(Mat& src, Mat& dest, double sigma)
-{
-	RNG rnd;
-#pragma omp parallel for
-	for(int j=0;j<src.rows;j++)
+{	
+	Mat noise(src.rows,src.cols,CV_32FC1);
+	Mat src_f;
+	vector<Mat> images;
+	split(src,images);
+	for(int c=0;c<src.channels();c++)
 	{
-		uchar* d = dest.ptr<uchar>(j);
-		uchar* s = src.ptr<uchar>(j);
-		for(int i=0;i<src.cols*3;i++)
-		{
-
-			d[i]=saturate_cast<uchar>(s[i]+rnd.gaussian(sigma));
-		}
+		images[c].convertTo(src_f,CV_32FC1);
+		randn(noise,Scalar(0.0),Scalar(sigma));
+		Mat temp = noise+src_f;
+		temp.convertTo(images[c],CV_8UC1);
 	}
+	merge(images,dest);
 }
 
 void addspikenoise(Mat& src, Mat& dest, int val)
 {
-	src.copyTo(dest);
-	RNG rnd;
+	src.copyTo(dest);	
 #pragma omp parallel for
 	for(int j=0;j<src.rows;j++)
 	{
+		RNG rnd(getTickCount());
 		uchar* d = dest.ptr<uchar>(j);
 		for(int i=0;i<src.cols;i++)
 		{

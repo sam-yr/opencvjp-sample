@@ -1,6 +1,6 @@
 //Super resolution with Bilateral Total Variation
 //Implimentation of a paper;
-//Farsiu, S.,Robinson, D., Elad, M., Milanfar, P.ÅhFast and robust multiframe super resolution,Åh IEEETrans.ImageProcessing 13 (2004)1327?1344.
+//Farsiu, S.,Robinson, D., Elad, M., Milanfar, P."Fast and robust multiframe super resolution," IEEETrans.ImageProcessing 13 (2004)1327?1344.
 
 #include <cv.h>
 #include <highgui.h>
@@ -168,20 +168,20 @@ void superresolutionSparseMat32f(Mat src[], Mat& dest, SparseMat DHF[], const in
 			mulSparseMat32f(DHF[n],temp,dstvectemp[n],true);
 		}
 		//creep ideal image, beta is parameter of the creeping speed.
-
-		sum_float_OMP(dstvectemp,dstvec,numofview,beta);
-		/*
-		for(int n=0;n<numofview;n++)
+		//add transeposed difference vector. sum_float_OMP is parallelized function of following for loop
+		/*for(int n=0;n<numofview;n++)
 		{
 			addWeighted(dstvec,1.0,dstvectemp[n],-beta,0.0,dstvec);
 			//dstvec -= (beta*dstvectemp[n]);//supported in OpenCV2.1
 		}*/
+		sum_float_OMP(dstvectemp,dstvec,numofview,beta);
+		
 
 		//add smoothness term
 		if(lambda>0.0)
 		{
 			addWeighted(dstvec,1.0,reg_vec,-beta*lambda,0.0,dstvec);
-			//dstvec -=lambda*beta*reg_vec;
+			//dstvec -=lambda*beta*reg_vec;//supported in OpenCV2.1
 		}
 
 		//show SR imtermediate process information. these processes does not be required at actural implimentation.
@@ -452,12 +452,12 @@ double getPSNR(Mat& src1, Mat& src2, int bb)
 	cvtColor(src2,s2,CV_BGR2GRAY);
 
 	int count=0;
-	for(j=bb;j<s1.cols-bb;j++)
+	for(j=bb;j<s1.rows-bb;j++)
 	{
 		uchar* d=s1.ptr(j);
 		uchar* s=s2.ptr(j);
 
-		for(i=bb;i<s1.rows-bb;i++)
+		for(i=bb;i<s1.cols-bb;i++)
 		{
 			sse += ((d[i] - s[i])*(d[i] - s[i]));
 			count++;

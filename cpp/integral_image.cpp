@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
-#include <opencv2/opencv.hpp>
+#include <cv.h>
+#include <highgui.h>
 using namespace std;
 using namespace cv;
 
@@ -41,7 +42,7 @@ int main(int argc, char** argv)
 	imshow("test",destCV);
 	waitKey();
 
-	//graph plot test
+	//(6) test function of computational cost  
 	speedTest(src);
 
 	return 0;
@@ -125,13 +126,14 @@ void speedTest(Mat& src)
 
 	Mat dest;
 
-	double t1=0.0;
-	double t2=0.0;
-	double t3=0.0;
 	for(int k=0;k<20;k++)
 	{
 		cout<<2*k+1<<endl;
 		Size kernel = Size(2*k+1,2*k+1);
+
+		double t1=0.0;
+		double t2=0.0;
+		double t3=0.0;
 		for(int i=0;i<maxiter;i++)
 		{
 			int64 t = getTickCount();
@@ -151,7 +153,6 @@ void speedTest(Mat& src)
 		cout<<"integral box"<<t2/maxiter<<"ms"<<endl;
 		cout<<"cv       box"<<t3/maxiter<<"ms"<<endl;
 
-
-		plot<<2*k+1<<" "<<t1<<" "<<t2<<" "<<t3<<endl;
+		plot<<2*k+1<<" "<<t1/maxiter<<" "<<t2/maxiter<<" "<<t3/maxiter<<endl;
 	}
 }

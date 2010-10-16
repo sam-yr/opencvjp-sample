@@ -42,8 +42,11 @@ int main(int argc, char** argv)
 		Mat show = imdecode(Mat(buff),CV_LOAD_IMAGE_COLOR);
 
 		double psnr = getPSNR(src,show);//get PSNR
-		sprintf(name,"quality:%03d, %.1fdB",q,psnr);
-        putText(show,name,Point(15,50), FONT_HERSHEY_DUPLEX,1,CV_RGB(255,255,255),1);
+		double bpp = 8.0*buff.size()/(show.size().area()*3.0);//bit/pixe;
+		sprintf(name,"quality:%03d, %.1fdB, %.2fbpp",q,psnr,bpp);
+		putText(show,name,Point(15,50), FONT_HERSHEY_SIMPLEX,1,CV_RGB(255,255,255),2);
+
+		
 
 		imshow("jpg",show);
 		key = waitKey(33);

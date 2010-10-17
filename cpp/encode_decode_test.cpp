@@ -11,12 +11,12 @@ int main(int argc, char** argv)
 {
 	Mat src = imread("lenna.png");
 
+	//(1) jpeg compression
 	vector<uchar> buff;//buffer for coding
 	vector<int> param = vector<int>(2);
-
-	//(1) jpeg compression
 	param[0]=CV_IMWRITE_JPEG_QUALITY;
 	param[1]=95;//default(95) 0-100
+
 	imencode(".jpg",src,buff,param);
 	cout<<"coded file size(jpg)"<<buff.size()<<endl;//fit buff size automatically.
 	Mat jpegimage = imdecode(Mat(buff),CV_LOAD_IMAGE_COLOR);
@@ -42,16 +42,23 @@ int main(int argc, char** argv)
 		Mat show = imdecode(Mat(buff),CV_LOAD_IMAGE_COLOR);
 
 		double psnr = getPSNR(src,show);//get PSNR
-		double bpp = 8.0*buff.size()/(show.size().area()*3.0);//bit/pixe;
+		double bpp = 8.0*buff.size()/(show.size().area());//bit/pixe;
 		sprintf(name,"quality:%03d, %.1fdB, %.2fbpp",q,psnr,bpp);
 		putText(show,name,Point(15,50), FONT_HERSHEY_SIMPLEX,1,CV_RGB(255,255,255),2);
-
-		
-
 		imshow("jpg",show);
 		key = waitKey(33);
 
-		if(key =='s')imwrite("out.png",show);
+		if(key =='s')
+		{
+			//(4) data writing 
+			sprintf(name,"q%03d_%.2fbpp.png",q,bpp);
+			imwrite(name,show);
+
+			sprintf(name,"q%03d_%.2fbpp.jpg",q,bpp);
+			param[0]=CV_IMWRITE_JPEG_QUALITY;
+			param[1]=q;
+			imwrite(name,src,param);;
+		}
 	}
 }
 double getPSNR(Mat& src1, Mat& src2, int bb)

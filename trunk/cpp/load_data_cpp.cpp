@@ -21,7 +21,7 @@ main (int argc, char **argv)
   cv::FileNode node(cvfs.fs, NULL);	// Get Top Node
   a = node["a"];
   b = node["b"];
-  cv::FileNode fn = node["mat_array"];
+  cv::FileNode fn = node[string("mat_array")];
 	
   for(i=0;i<fn.size();i++){
     cv::read(fn[i], mat[i]);

@@ -7,14 +7,6 @@ using namespace std;
 
 // class declaration
 class DftIdftApp {
-private:
-  Mat src_img, mag_img;
-  Mat Re_img, Im_img, Complex_img;
-  Mat zero, dft_src, dft_dst, dft_dst_p;
-  Mat idft_img;
-  vector<Mat> mv;
-  string org_win, mag_win, idft_win;
-  int src_cols, src_rows, dft_cols, dft_rows;
 public:
   DftIdftApp(const string filename);
   ~DftIdftApp(){};
@@ -26,6 +18,14 @@ public:
   void calcIDFT(bool all=false);
   void clear(){idft_img.setTo(0);}
   static void onMouse(int event, int x, int y, int flags, void* param);
+private:
+  Mat src_img, mag_img;
+  Mat Re_img, Im_img, Complex_img;
+  Mat zero, dft_src, dft_dst, dft_dst_p;
+  Mat idft_img;
+  vector<Mat> mv;
+  string org_win, mag_win, idft_win;
+  int src_cols, src_rows, dft_cols, dft_rows;
 };
 
 // constructor
@@ -58,8 +58,8 @@ DftIdftApp::DftIdftApp(const string filename)
 void
 DftIdftApp::calcMagImage()
 {
-  dft_rows = getOptimalDFTSize(src_rows-1);
-  dft_cols = getOptimalDFTSize(src_cols-1);
+  dft_rows = getOptimalDFTSize(src_rows);
+  dft_cols = getOptimalDFTSize(src_cols);
   dft_src = Mat::zeros(dft_rows, dft_cols, CV_64FC2);
   
   Mat roi(dft_src, Rect(0, 0, src_cols, src_rows));
@@ -70,7 +70,8 @@ DftIdftApp::calcMagImage()
 
   split(dft_dst.mul(dft_dst), mv);
   sqrt(mv[0]+mv[1], mv[0]);
-  log(mv[0]+1, mv[0]);
+  log(mv[0]+1, mv[0]); // for ver. 2.1 or later
+  
 
   shiftDFT(mv[0], mv[0]);
 
@@ -169,7 +170,7 @@ main(int argc, char *argv[])
   const string filename = argc > 1 ? argv[1] : "../image/Fourier.png";
   DftIdftApp app(filename);
 
-  cout << "Usage: click and drag on Magnitude Image.\n" <<
+  cout << "Usage: click or drag on Magnitude Image.\n" <<
     "Hot keys: \n"
     "\tESC - quit the program\n"
     "\ta - select all pixels\n"

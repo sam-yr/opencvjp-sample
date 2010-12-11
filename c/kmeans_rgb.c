@@ -11,7 +11,7 @@ int main(int argc, char** argv)
   CvMat *clusters, *points, *tmp;
   CvMat *count = cvCreateMat( MAX_CLUSTERS, 1, CV_32SC1);
   CvMat *centers = cvCreateMat( MAX_CLUSTERS, 3, CV_32FC1);
-  char *imagename;
+  const char *imagename;
 
   // (1)load a specified file as a 3-channel color image
   imagename = argc > 1 ? argv[1] : "../image/boat.png";
@@ -22,7 +22,7 @@ int main(int argc, char** argv)
   size = src_img->width * src_img->height;
   dst_img  = cvCloneImage(src_img);
   clusters = cvCreateMat(size, 1, CV_32SC1 );
-  points   = cvCreateMat( size, 1, CV_32FC3 );
+  points   = cvCreateMat(size, 1, CV_32FC3 );
 
   // (2)reshape the image to be a 1 column matrix 
 #if 1

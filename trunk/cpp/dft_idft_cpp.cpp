@@ -68,16 +68,18 @@ DftIdftApp::calcMagImage()
   dft(dft_src, dft_dst);
   dft_dst_p = Mat::zeros(dft_dst.size(), dft_dst.type());
 
-  split(dft_dst.mul(dft_dst), mv);
-  sqrt(mv[0]+mv[1], mv[0]);
+  //split(dft_dst.mul(dft_dst), mv);
+  //sqrt(mv[0]+mv[1], mv[0]);
+  split(dft_dst, mv);
+  magnitude(mv[0], mv[1], mv[0]);
   log(mv[0]+1, mv[0]); // for ver. 2.1 or later
-  
-
+   
   shiftDFT(mv[0], mv[0]);
 
-  double min, max;
-  minMaxLoc(mv[0], &min, &max);
-  mag_img = mv[0]*1.0/(max-min) - 1.0*min/(max-min);
+  //double min, max;
+  //minMaxLoc(mv[0], &min, &max);
+  //mag_img = mv[0]*1.0/(max-min) - 1.0*min/(max-min);
+  normalize(mv[0], mag_img, 0, 1, CV_MINMAX);
 }
 
 // swap 1,3 and 2,4 quadrants respectively

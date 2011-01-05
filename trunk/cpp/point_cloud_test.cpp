@@ -70,8 +70,6 @@ void reprojectKinectDepth3D(Mat& src, Mat& dest, const double focal_length, Poin
 					}
 				}
 			}
-			//s[0]=st;//‚à‚Æ‚É–ß‚·
-			//s[src.cols-1]=ed;
 		}
 	}
 
@@ -432,7 +430,6 @@ void stereoTest()
 	const double step=baseline;
 	int key=0;
 	bool isSub=true;
-	//(4) rendering loop
 	while(key!='q')
 	{
 		lookat(viewpoint, lookatpoint , R);
@@ -443,7 +440,7 @@ void stereoTest()
 		cout<<t<<endl;
 		t=R*t;
 
-		//(5) projecting 3D point cloud to image.
+		//(4) projecting 3D point cloud to image.
 		projectImagefromXYZ(image,destimage,disp,destdisp,xyz,R,t,K,dist,isSub);
 
 		destdisp.convertTo(dispshow,CV_8U,0.5);
@@ -451,6 +448,7 @@ void stereoTest()
 		imshow("image",destimage);
 
 		key = waitKey(1);
+          	//(5) key map
 		if(key=='f')
 		{
 			isSub=isSub?false:true;

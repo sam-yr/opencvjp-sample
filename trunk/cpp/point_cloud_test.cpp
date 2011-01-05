@@ -1,19 +1,5 @@
 #include <opencv2/opencv.hpp>
-#pragma comment(lib, "opencv_imgproc220.lib")
-#pragma comment(lib, "opencv_video220.lib")
-#pragma comment(lib, "opencv_ts220.lib")
-#pragma comment(lib, "opencv_objdetect220.lib")
-#pragma comment(lib, "opencv_ml220.lib")
-#pragma comment(lib, "opencv_legacy220.lib")
-#pragma comment(lib, "opencv_imgproc220.lib")
-#pragma comment(lib, "opencv_highgui220.lib")
-#pragma comment(lib, "opencv_haartraining_engine.lib")
-#pragma comment(lib, "opencv_gpu220.lib")
-#pragma comment(lib, "opencv_ffmpeg220.lib")
-#pragma comment(lib, "opencv_features2d220.lib")
-#pragma comment(lib, "opencv_core220.lib")
-#pragma comment(lib, "opencv_contrib220.lib")
-#pragma comment(lib, "opencv_calib3d220.lib")
+
 using namespace cv;
 
 void reprojectKinectDepth3D(Mat& src, Mat& dest, const double focal_length, Point2d imageCenter=Point2d(-1,-1))

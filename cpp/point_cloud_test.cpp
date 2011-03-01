@@ -500,7 +500,7 @@ void kinectTest()
 	K.at<double>(1,1)=focal_length;
 	K.at<double>(0,2)=(640-1.0)/2.0;
 	K.at<double>(1,2)=(480-1.0)/2.0;
-	Mat dist=Mat::zeros(8,1,CV_64F);
+	Mat dist=Mat::zeros(5,1,CV_64F);
 
 	Mat R=Mat::eye(3,3,CV_64F);
 	Mat t=Mat::zeros(3,1,CV_64F);

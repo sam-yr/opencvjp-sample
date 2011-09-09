@@ -25,7 +25,7 @@ int main(int argc, char** argv)
   points   = cvCreateMat(size, 1, CV_32FC3 );
 
   // (2)reshape the image to be a 1 column matrix 
-#if 1
+#if 0
   tmp = cvCreateMat(size, 1, CV_8UC3);
   tmp = cvReshape(src_img, &tmp_header, 0, size);
   cvConvert(tmp, points);
@@ -37,7 +37,7 @@ int main(int argc, char** argv)
     points->data.fl[i*3+2] = (uchar)src_img->imageData[i*3+2];
   }
 #endif
-  
+
   // (3)run k-means clustering algorithm to segment pixels in RGB color space
   cvKMeans2( points, MAX_CLUSTERS, clusters,
 	     cvTermCriteria( CV_TERMCRIT_EPS+CV_TERMCRIT_ITER, 10, 1.0 ),
@@ -66,6 +66,6 @@ int main(int argc, char** argv)
   cvReleaseMat(&points);
   cvReleaseMat(&centers);
   cvReleaseMat(&count);
-  
+
   return 0;
 }

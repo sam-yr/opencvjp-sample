@@ -20,7 +20,7 @@ main (int argc, char **argv)
   Mat hist_img(Size(ch_width * sch, 200), CV_8UC3, Scalar::all(255));
 
   vector<MatND> hist(3);
-  const int hist_size = 256;
+  const int hist_size = 256; 
   const int hdims[] = {hist_size};
   const float hranges[] = {0,256};
   const float* ranges[] = {hranges};

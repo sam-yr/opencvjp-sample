@@ -181,7 +181,7 @@ bool PoissonBlender::copyResult(Eigen::Matrix<T, Eigen::Dynamic, 1> &u)
   int h = mask_roi1.height;
   for(int y=1; y<h-1; ++y) {
     uchar *pd = dst1.ptr(y);
-    uchar *pm = mask1.ptr(y);
+    uchar *pm = mask1.ptr(y)+1;
     for(int x=1; x<w-1; ++x, ++pm) {
       if(*pm==0) {
         pd += 3;

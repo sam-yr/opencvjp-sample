@@ -103,7 +103,6 @@ double calcPSNR(Mat& src, Mat& dest)
 	return sn;
 }
 ////////////////////////////////////////////////////////////////////////////////
-
 //main implementaion
 void nonlocalMeansFilter(Mat& src, Mat& dest, int templeteWindowSize, int searchWindowSize, double h, double sigma=0.0)
 {
@@ -132,54 +131,58 @@ void nonlocalMeansFilter(Mat& src, Mat& dest, int templeteWindowSize, int search
 	double* w = &weight[0];
 	const double gauss_sd = (sigma == 0.0) ? h :sigma;
 	double gauss_color_coeff = -(1.0/(double)(src.channels()))*(1.0/(h*h));
-	int nxt;
+	int emax;
 	for(int i = 0; i < 256*256*src.channels(); i++ )
 	{
 		double v = std::exp( max(i-2.0*gauss_sd*gauss_sd,0.0)*gauss_color_coeff);
 		w[i] = v;
 		if(v<0.001)
 		{
-			nxt=i;
+			emax=i;
 			break;
 		}
 	}
-	for(int i = nxt; i < 256*256*src.channels(); i++ )w[i] = 0.0;
+	for(int i = emax; i < 256*256*src.channels(); i++ )w[i] = 0.0;
 
 	if(src.channels()==3)
 	{
+		const int cstep = im.step-templeteWindowSize*3;
+		const int csstep = im.step-searchWindowSize*3;
 #pragma omp parallel for
 		for(int j=0;j<src.rows;j++)
 		{
 			uchar* d = dest.ptr(j);
-			uchar* ss = im.ptr(j);
-			vector<int> ww(D);
-			vector<double> nw(D);
+			int* ww=new int[D];
+			double* nw=new double[D];
 			for(int i=0;i<src.cols;i++)
 			{
 				double tweight=0.0;
 				//search loop
-
-				const int bbj = bb+j;
-				const int bbi = bb+i;
-				for(int l=-sr,count=0;l<=sr;l++)
+				uchar* tprt = im.data +im.step*(sr+j) + 3*(sr+i); 
+				uchar* sptr2 = im.data +im.step*j + 3*i;
+				for(int l=searchWindowSize,count=D-1;l--;)
 				{
-					for(int k=-sr;k<=sr;k++)
+					uchar* sptr = sptr2 +im.step*(l);
+					for (int k=searchWindowSize;k--;)
 					{
 						//templete loop
 						int e=0;
-						for(int n=-tr;n<=tr;n++)
+						uchar* t = tprt;
+						uchar* s = sptr+3*k;
+						for(int n=templeteWindowSize;n--;)
 						{
-							uchar* s = im.ptr(bbj+l+n); s+=3*(bbi+k);
-							uchar* t = im.ptr(bbj+n);t+=3*(bbi);
-							for(int m=-tr;m<=tr;m++)
+							for(int m=templeteWindowSize;m--;)
 							{
 								// computing color L2 norm
 								e += (s[0]-t[0])*(s[0]-t[0])+(s[1]-t[1])*(s[1]-t[1])+(s[2]-t[2])*(s[2]-t[2]);//L2 norm
 								s+=3,t+=3;
 							}
+							t+=cstep;
+							s+=cstep;
 						}
+						//s+=cstep;
 						const int ediv = e*tdiv;
-						ww[count++]=ediv;
+						ww[count--]=ediv;
 						//get weighted Euclidean distance
 						tweight+=w[ediv];
 					}
@@ -196,59 +199,68 @@ void nonlocalMeansFilter(Mat& src, Mat& dest, int templeteWindowSize, int search
 					for(int z=0;z<D;z++) nw[z]=w[ww[z]]*itweight;
 				}
 
-				double r=0.0,g=0.0,b=0.0;
-				for(int l=0,count=0;l<searchWindowSize;l++)
+				double r=0.0,g=0.0,b=0.0; 
+				uchar* s = im.ptr(j+tr); s+=3*(tr+i);
+				for(int l=searchWindowSize,count=0;l--;)
 				{
-					uchar* s = im.ptr(bbj+l-sr); s+=3*(bbi-sr);
-					for(int k=0;k<searchWindowSize;k++)
+					for(int k=searchWindowSize;k--;)
 					{
 						r += s[0]*nw[count];
 						g += s[1]*nw[count];
 						b += s[2]*nw[count++];
 						s+=3;
 					}
+					s+=csstep;
 				}
 				d[0] = saturate_cast<uchar>(r);
 				d[1] = saturate_cast<uchar>(g);
 				d[2] = saturate_cast<uchar>(b);
 				d+=3;
-			}
-		}
+			}//i
+			delete[] ww;
+			delete[] nw;
+		}//j
 	}
 	else if(src.channels()==1)
 	{
+		const int cstep = im.step-templeteWindowSize;
+		const int csstep = im.step-searchWindowSize;
 #pragma omp parallel for
 		for(int j=0;j<src.rows;j++)
 		{
 			uchar* d = dest.ptr(j);
-			uchar* ss = im.ptr(j);
-			vector<int> ww(D);
-			vector<double> nw(D);
+			int* ww=new int[D];
+			double* nw=new double[D];
 			for(int i=0;i<src.cols;i++)
 			{
 				double tweight=0.0;
 				//search loop
-
-				const int bbj = bb+j;
-				const int bbi = bb+i;
-				for(int l=-sr,count=0;l<=sr;l++)
+				uchar* tprt = im.data +im.step*(sr+j) + (sr+i); 
+				uchar* sptr2 = im.data +im.step*j + i;
+				for(int l=searchWindowSize,count=D-1;l--;)
 				{
-					for(int k=-sr;k<=sr;k++)
+					uchar* sptr = sptr2 +im.step*(l);
+					for (int k=searchWindowSize;k--;)
 					{
 						//templete loop
 						int e=0;
-						for(int n=-tr;n<=tr;n++)
+						uchar* t = tprt;
+						uchar* s = sptr+k;
+						for(int n=templeteWindowSize;n--;)
 						{
-							uchar* s = im.ptr(bbj+l+n); s+=(bbi+k);
-							uchar* t = im.ptr(bbj+n);t+=(bbi);
-							for(int m=-tr;m<=tr;m++)
-							{							
+							for(int m=templeteWindowSize;m--;)
+							{
+								// computing color L2 norm
 								e += (*s-*t)*(*s-*t);
 								s++,t++;
 							}
+							t+=cstep;
+							s+=cstep;
 						}
+						//s+=cstep;
 						const int ediv = e*tdiv;
-						ww[count++]=ediv;
+						ww[count--]=ediv;
+						//get weighted Euclidean distance
 						tweight+=w[ediv];
 					}
 				}
@@ -265,17 +277,20 @@ void nonlocalMeansFilter(Mat& src, Mat& dest, int templeteWindowSize, int search
 				}
 
 				double v=0.0;
-				for(int l=0,count=0;l<searchWindowSize;l++)
+				uchar* s = im.ptr(j+tr); s+=(tr+i);
+				for(int l=searchWindowSize,count=0;l--;)
 				{
-					uchar* s = im.ptr(bbj+l-sr); s+=(bbi-sr);
-					for(int k=0;k<searchWindowSize;k++)
+					for(int k=searchWindowSize;k--;)
 					{
 						v += *(s++)*nw[count++];
 					}
+					s+=csstep;
 				}
-				*(d++) = saturate_cast<uchar>(v);
-			}
-		}
+				 *(d++) = saturate_cast<uchar>(v); 
+			}//i
+			delete[] ww;
+			delete[] nw;
+		}//j
 	}
 }
 
@@ -283,7 +298,7 @@ int main(int argc, char** argv)
 {
 	//(1) Reading image and add noise(standart deviation = 15)
 	const double noise_sigma = 15.0;
-	Mat src = imread("lenna.png");
+	Mat src = imread("lenna.png",1);
 	Mat snoise;
 	Mat dest;
 	addNoise(src,snoise,noise_sigma);
@@ -318,7 +333,9 @@ int main(int argc, char** argv)
 	//(3) analizing of performance of Nonlocal means filter
 	pre = getTickCount();
 	nonlocalMeansFilter(snoise,dest,3,7,noise_sigma,noise_sigma);
-	cout<<"time: "<<1000.0*(getTickCount()-pre)/(getTickFrequency())<<" ms"<<endl;
+	nonlocalMeansFilter(snoise,dest,3,7,noise_sigma,noise_sigma);
+	nonlocalMeansFilter(snoise,dest,3,7,noise_sigma,noise_sigma);
+	cout<<"time: "<<0.333*1000.0*(getTickCount()-pre)/(getTickFrequency())<<" ms"<<endl;
 	cout<<"nonlocal: "<<calcPSNR(src,dest)<<endl<<endl;
 	imwrite("nonlocal.png",dest);
 

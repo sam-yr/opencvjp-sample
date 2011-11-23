@@ -180,7 +180,6 @@ void nonlocalMeansFilter(Mat& src, Mat& dest, int templeteWindowSize, int search
 							t+=cstep;
 							s+=cstep;
 						}
-						//s+=cstep;
 						const int ediv = e*tdiv;
 						ww[count--]=ediv;
 						//get weighted Euclidean distance
@@ -257,7 +256,6 @@ void nonlocalMeansFilter(Mat& src, Mat& dest, int templeteWindowSize, int search
 							t+=cstep;
 							s+=cstep;
 						}
-						//s+=cstep;
 						const int ediv = e*tdiv;
 						ww[count--]=ediv;
 						//get weighted Euclidean distance
@@ -333,9 +331,7 @@ int main(int argc, char** argv)
 	//(3) analizing of performance of Nonlocal means filter
 	pre = getTickCount();
 	nonlocalMeansFilter(snoise,dest,3,7,noise_sigma,noise_sigma);
-	nonlocalMeansFilter(snoise,dest,3,7,noise_sigma,noise_sigma);
-	nonlocalMeansFilter(snoise,dest,3,7,noise_sigma,noise_sigma);
-	cout<<"time: "<<0.333*1000.0*(getTickCount()-pre)/(getTickFrequency())<<" ms"<<endl;
+	cout<<"time: "<<1000.0*(getTickCount()-pre)/(getTickFrequency())<<" ms"<<endl;
 	cout<<"nonlocal: "<<calcPSNR(src,dest)<<endl<<endl;
 	imwrite("nonlocal.png",dest);
 

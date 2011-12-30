@@ -1,6 +1,7 @@
 #include <opencv2/opencv.hpp>
 
 using namespace cv;
+using namespace std;
 void reprojectKinectDepth3D(Mat& src, Mat& dest, const double focal_length, Point2d imageCenter=Point2d(-1,-1))
 {
 	if(dest.empty())dest=Mat::zeros(src.size().area(),1,CV_32FC3);
@@ -197,7 +198,8 @@ static void projectImagefromXYZ_(Mat& image, Mat& destimage, Mat& disp, Mat& des
 	if(destdisp.empty())destdisp=Mat::zeros(Size(image.size()),disp.type());
 
 	vector<Point2f> pt;
-	cv::projectPoints(xyz,R,t,K,Mat(),pt);	
+	if(dist.empty()) dist = Mat::zeros(Size(5,1),CV_32F);
+	cv::projectPoints(xyz,R,t,K,dist,pt);	
 
 	destimage.setTo(0);
 	destdisp.setTo(0);

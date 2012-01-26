@@ -156,9 +156,9 @@ void mulSparseMat32f(SparseMat& smat, Mat& src, Mat& dest, bool isTranspose)
 		{	
 			float* d = dest.ptr<float>(it.node()->idx[0]);
 			float* s = src.ptr<float>(it.node()->idx[1]);
-			for(int c=0;c<3;c++)
+			for(int color=0;color<3;color++)
 			{
-				d[c]+= it.value<float>() * s[c];
+				d[color]+= it.value<float>() * s[color];
 			}
 		}
 	}
@@ -168,9 +168,9 @@ void mulSparseMat32f(SparseMat& smat, Mat& src, Mat& dest, bool isTranspose)
 		{	
 			float* d = dest.ptr<float>(it.node()->idx[1]);
 			float* s = src.ptr<float>(it.node()->idx[0]);
-			for(int c=0;c<3;c++)
+             for(int color=0;color<3;color++)
 			{
-				d[c]+= it.value<float>() * s[c];
+				d[color]+= it.value<float>() * s[color];
 			}
 		}
 	}
@@ -213,9 +213,10 @@ void blurSparseMat32f(Mat& src, Mat& dest, SparseMat& H)
 	{	
 		float* d = dstvec.ptr<float>(it.node()->idx[0]);
 		uchar* s = svec.ptr<uchar>(it.node()->idx[1]);
-		for(int c=0;c<3;c++)
+        
+        for(int color=0;color<3;color++)
 		{
-			d[c]+= it.value<float>() * s[c];
+			d[color]+= it.value<float>() * s[color];
 		}
 	}
 

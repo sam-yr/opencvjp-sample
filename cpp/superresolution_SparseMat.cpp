@@ -377,12 +377,12 @@ void addgaussnoise(Mat& src, Mat& dest, double sigma)
 	Mat src_f;
 	vector<Mat> images;
 	split(src,images);
-	for(int c=0;c<src.channels();c++)
+	for(int i=0;i<src.channels();i++)
 	{
-		images[c].convertTo(src_f,CV_32FC1);
+		images[i].convertTo(src_f,CV_32FC1);
 		randn(noise,Scalar(0.0),Scalar(sigma));
 		Mat temp = noise+src_f;
-		temp.convertTo(images[c],CV_8UC1);
+		temp.convertTo(images[i],CV_8UC1);
 	}
 	merge(images,dest);
 }
@@ -419,9 +419,9 @@ void mulSparseMat32f(SparseMat& smat, Mat& src, Mat& dest, bool isTranspose)
 			int j=it.node()->idx[1];
 			float* d = dest.ptr<float>(j);
 			float* s = src.ptr<float>(i);
-			for(int c=0;c<3;c++)
+			for(int i=0;i<3;i++)
 			{
-				d[c]+= it.value<float>() * s[c];
+				d[i]+= it.value<float>() * s[i];
 			}
 		}
 	}
@@ -433,9 +433,9 @@ void mulSparseMat32f(SparseMat& smat, Mat& src, Mat& dest, bool isTranspose)
 			int j=it.node()->idx[0];
 			float* d = dest.ptr<float>(j);
 			float* s = src.ptr<float>(i);
-			for(int c=0;c<3;c++)
+			for(int i=0;i<3;i++)
 			{
-				d[c]+= it.value<float>() * s[c];
+				d[i]+= it.value<float>() * s[i];
 			}
 		}
 	}
